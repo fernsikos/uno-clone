@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { getFirestore, doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
 
 
+
 @Component({
   selector: 'app-config-game',
   templateUrl: './config-game.component.html',
