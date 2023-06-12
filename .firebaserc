@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "uno-clone-cee22": {
+      "hosting": {
+        "uno": [
+          "uno-clone-cee22"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "uno-clone-cee22"
+  }
+}

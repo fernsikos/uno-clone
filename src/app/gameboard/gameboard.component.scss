@@ -1,0 +1,148 @@
+:root {
+    overflow: hidden;
+}
+
+.gameboard {
+    background-image: url("~src/assets/background-gd67c8c145_1920.jpg");
+    height: 100vh;
+    width: 100vw;
+    max-width: 100%;
+    background-position: center;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    overflow: hidden !important;
+
+    img {
+        height: 158px;
+        width: 105px;
+    }
+
+    .middle-layer {
+
+        .game-center-container {
+            display: flex;
+
+            .throwed-cards-container {
+
+                height: 200px;
+                width: 200px;
+                position: relative;
+
+                img {
+                    position: absolute;
+                    animation: throwFromBottom 1s ease-out;
+                }
+
+                .firstcard {
+
+                    animation: firstcard 1s ease-in-out  !important;
+                }
+
+                @keyframes throwFromBottom {
+                    
+                    0% {
+                        transform: translateY(1000px) rotate(-10deg) translateX(300px);
+                        
+                    }
+                }
+
+                @keyframes firstcard {
+                    0% {
+                        transform: translateX(200px);
+                    }
+                }
+            }
+
+            .stack-container {
+
+                img {
+                    cursor: pointer;
+                    transition: all 125ms ease-in;
+                    position: absolute;
+
+                    &:hover {
+                        transform: scale(1.05) translateY(-8px);
+                    }
+                }
+
+                .animated-card {
+                    transform: scale(1.05) translateY(-8px);
+                    position: absolute;
+                    animation: pickCardAnimation 1.5s ease-in-out;
+                    z-index: 99;
+                }
+
+                @keyframes pickCardAnimation {
+                    
+                    0% {
+                        transform: translateY(0);
+                    }
+
+                    10% {
+                        transform: translateY(-30%);
+                    }
+
+                    100% {
+                        transform: translateY(390%);
+                    }
+                }
+            }
+        }
+    }
+
+    .bottom-layer {
+
+
+        .my-cards {
+
+            max-width: calc(100vw - 100px);
+            overflow-y:hidden;
+            overflow-x: hidden;
+            position: relative;
+            scrollbar-gutter: stable both-edges;
+            height: 230px;
+            background-color: rgba(250, 235, 215, 0.149);
+            transition: all 225ms ease-in-out;
+
+            img {
+                position: absolute;
+                bottom: 20px;
+                transition: all 125ms ease-in;
+                cursor: pointer;
+                animation: getCardAnimation 1s ease-in-out;
+
+                &:hover {
+                    transform: scale(1.15) translateY(-15px);
+                }
+            }
+
+            .throwCard {
+                animation: throwCardAnimation 0.5s ease-in-out forwards !important;
+            }
+        }
+
+        @keyframes getCardAnimation {
+            
+            0% {
+                transform: translateY(120%)
+            }
+
+            100% {
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes throwCardAnimation {
+            0% {
+                transform: translateY(0)
+            }
+
+            100% {
+                transform: translateY(120%)
+            }
+        }
+    }
+}

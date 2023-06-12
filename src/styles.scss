@@ -1,1 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+::-webkit-scrollbar {
+    width: 8px; /* Breite des Scrollbalkens */
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f100; /* Hintergrundfarbe des Scrollbalken-Tracks */
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #00000087; /* Farbe des Scrollbalken-Thumb */
+    border-radius: 8px; /* Radius des Scrollbalken-Thumb */
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Farbe des Scrollbalken-Thumb bei Hover */
+  }
