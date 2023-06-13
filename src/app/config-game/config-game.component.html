@@ -1,6 +1,13 @@
 <div class="container">
     <div class="card">
-        <input type="text">
-        <button class="new-game-btn" >New Game</button>
+        <div class="card-top">
+            <h1>Welcome to Uno-Clone</h1>
+            <input type="text" [(ngModel)]="myName" placeholder="Enter your name">
+           
+        </div>
+        <div class="card-bottom">
+            <button class="new-game-btn" [disabled]="!myName" (click)="addPlayerToGame()">Join Game</button>
+        </div>
     </div>
+    
 </div>

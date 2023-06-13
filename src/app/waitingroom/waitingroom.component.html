@@ -1,0 +1,15 @@
+<div class="container">
+    <div class="card">
+        <div class="card-top">
+            <h1>Wait for others to join</h1>
+
+            <div *ngFor="let player of joinedPlayers" class="player">{{ player['name'] }}</div>
+            
+           
+        </div>
+        <div class="card-bottom">
+            <button class="new-game-btn" (click)="startGameForAllPlayers()">Join Game</button>
+        </div>
+    </div>
+    
+</div>

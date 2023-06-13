@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc, onSnapshot, collection } from 'firebase/firestore';
+import { environment } from 'src/environments/environment';
+
 
 
 
@@ -15,23 +18,53 @@ export class ConfigGameComponent implements OnInit {
 
   gameId:string;
   player:number;
-  db: any = getFirestore();
-  allPlayers: any = []
+  joinedPlayers: any = [];
+  app = initializeApp(environment.firebase)
+  db: any = getFirestore(this.app);
+  public myName: string;
 
-  ngOnInit() {
+  async ngOnInit() {
     this.route.params.subscribe(params => {
-      this.gameId = params['id'],
-      this.player = params['player']
+      this.gameId = params['id']
     })
-
+    this.snapPlayersJoinedGame();
+   
+    
+  }
+  
+  addPlayerToGame() {
+    if (this.myName.length > 0) {
+      setDoc(doc(this.db, 'games', this.gameId, 'player', this.player.toString()), {
+        number: this.player,
+        name: this.myName
+      })
+    }
+    this.enterWaitingroom()
   }
 
-  joinPlayerToGame() {
+  enterWaitingroom() {
+    this.router.navigateByUrl('/waitingroom/P4ipHCPYOzyQU3u9reBu/' + this.player)
+  }
+  
+  snapPlayersJoinedGame() {
     onSnapshot(collection(this.db, 'games', this.gameId, 'player'), async (snapshot) => {
-      snapshot.docs.forEach(async(doc) => {
-        console.log(doc)
+      snapshot.docChanges().forEach(async(change) => {
+        if (change.type === 'added') {
+          this.joinedPlayers.push(change.doc.data())
+        } else if (change.type === 'removed') {
+         this.removePlayer(change)
+        }
+        console.log(change.type);
       })
+      console.log(this.joinedPlayers.length)
+      this.player = this.joinedPlayers.length + 1
+      console.log('i am player number: ' + this.player)
     })
+  }
+
+  removePlayer(change) {
+    let playerToREemove = this.joinedPlayers.findIndex(m => m.number === change.doc.data()['number']);
+    this.joinedPlayers.splice(playerToREemove, 1)
   }
 
 }

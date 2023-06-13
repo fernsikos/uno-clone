@@ -12,6 +12,8 @@ import { provideFirestore,getFirestore } from '@angular/fire/firestore';
 import { StartScreenComponent } from './start-screen/start-screen.component';
 import { ConfigGameComponent } from './config-game/config-game.component';
 import { AngularFireModule } from '@angular/fire/compat';
+import { FormsModule } from '@angular/forms';
+import { WaitingroomComponent } from './waitingroom/waitingroom.component';
 
 
 @NgModule({
@@ -19,11 +21,13 @@ import { AngularFireModule } from '@angular/fire/compat';
     AppComponent,
     GameboardComponent,
     StartScreenComponent,
-    ConfigGameComponent
+    ConfigGameComponent,
+    WaitingroomComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
+    FormsModule,
     AngularFireModule.initializeApp(environment.firebase),
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),
