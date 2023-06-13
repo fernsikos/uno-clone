@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Game } from '../models/game';
 import { Rules } from '../models/rules';
+import { OnlineGame } from '../models/online-game';
+import { ActivatedRoute } from '@angular/router';
+import { FirestoreService } from '../firestore.service';
 
 
 @Component({
@@ -10,23 +13,41 @@ import { Rules } from '../models/rules';
 })
 export class GameboardComponent implements OnInit {
 
-  game: Game;
+  playerNumber: number;
+  gameId: string;
   rules: Rules;
   toDrawcount: number = 1;
   public pickCardAnimation: boolean = false;
   public cardInThrow: string;
   myCards: any[] = [];
 
-  ngOnInit(): void {
-    this.game = new Game();
-    this.rules = new Rules();
-    this.pickInitialCards();
-
+  constructor(private route:ActivatedRoute, public firestoreService: FirestoreService) {
   }
 
+  async ngOnInit() {
+    this.route.params.subscribe(params => {
+      this.gameId = params['id'];
+      this.playerNumber = params['player']
+    })
+    this.firestoreService.game = new Game();
+    this.firestoreService.onlineGame = new OnlineGame();
+    if (this.playerNumber == 1) {
+      this.firestoreService.pushGameToFirestore(this.gameId);
+    } 
+    
+    await this.firestoreService.loadStackFromFirestore(this.gameId)
+    
+    this.rules = new Rules();
+    // this.firestoreService.onlineGame.stack = this.firestoreService.testStack;
+    this.firestoreService.pickFirstCard();
+    this.pickInitialCards();
+  }
+
+ 
+
   pickInitialCards() {
-    for (let i = 0; i < 7; i++) {
-      const element = this.game.stack[i];
+    for (let i = this.playerNumber * 7; i < this.playerNumber * 7 + 7; i++) {
+      const element = this.firestoreService.testStack[i];
       this.myCards.push(element)
     }
   }
@@ -36,8 +57,8 @@ export class GameboardComponent implements OnInit {
     setTimeout(() => {
       this.pickCardAnimation = false;
       for (let i = 0; i < this.toDrawcount; i++) {
-        this.myCards.push(this.game.stack[this.game.stack.length - 1]);
-        this.game.stack.pop();
+        this.myCards.push(this.firestoreService.game.stack[this.firestoreService.game.stack.length - 1]);
+        this.firestoreService.game.stack.pop();
       }
       if(this.toDrawcount > 1) {
         this.toDrawcount = 1
@@ -47,7 +68,7 @@ export class GameboardComponent implements OnInit {
   }
 
   checkIfCardThrowable(i) {
-    let returnData = this.rules.compareCards(this.myCards[i], this.game.lastCard)
+    let returnData = this.rules.compareCards(this.myCards[i], this.firestoreService.onlineGame.lastCard)
     if(returnData['pass']) {
       this.updateGameVariables(returnData)
       this.throwCard(i);
@@ -65,13 +86,13 @@ export class GameboardComponent implements OnInit {
   }
 
   updateLastCard(i) {
-    this.game.lastCard = this.myCards[i]
+    this.firestoreService.onlineGame.lastCard = this.myCards[i]
   }
 
   throwCard(i) {
     this.myCards[i].throw = true
     setTimeout(() => {
-      this.game.throwedCards.push(this.myCards[i])
+      this.firestoreService.game.throwedCards.push(this.myCards[i])
       this.myCards.splice(i, 1)
     }, 500);
   }

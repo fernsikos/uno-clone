@@ -1,15 +1,13 @@
 export class Game {
     public stack: any[] = [];
     public throwedCards: any = [];
-    public lastCard: object;
-    public gameDirection: string = 'clockwise';
-    public currentColor: string;
     public types: string[] = [
         "blue", "green", "yellow", "red"
     ];
 
 
     constructor() {
+       
         for (let i = 0; i < this.types.length; i++) {
             const element = this.types[i];
             this.pushZeroToNine(element);
@@ -18,26 +16,16 @@ export class Game {
         }
         this.pushWilds();
         this.shuffle(this.stack);
-        this.pickFirstCard()
+        
     }
 
     public toJson() {
         return {
             stack: this.stack,
-            throwedCards: this.throwedCards,
-            lastCard: this.lastCard,
-            gameDirection: this.gameDirection,
         }
     }
 
-    pickFirstCard() {
-        this.lastCard = this.stack[0];
-        this.updateCurrentColor()
-    }
-
-    updateCurrentColor() {
-        this.currentColor = this.lastCard['color'];
-    }
+    
 
     shuffle(array) {
         let currentIndex = array.length, randomIndex: number;

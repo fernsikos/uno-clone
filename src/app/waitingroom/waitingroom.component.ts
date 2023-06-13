@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 
 
 
+
 @Component({
   selector: 'app-waitingroom',
   templateUrl: './waitingroom.component.html',
@@ -15,7 +16,6 @@ export class WaitingroomComponent implements OnInit {
   constructor(private router:Router, private route: ActivatedRoute) {
 
   }
-
   gameId: string;
   playerNumer: number;
   app = initializeApp(environment.firebase)
@@ -81,7 +81,4 @@ export class WaitingroomComponent implements OnInit {
     this.router.navigateByUrl('/game/P4ipHCPYOzyQU3u9reBu/' + this.playerNumer)
   }
 
-  prepareGame() {
-    
-  }
 }

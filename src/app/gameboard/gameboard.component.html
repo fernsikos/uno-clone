@@ -4,8 +4,8 @@
         <div class="player-two-container"></div>
         <div class="game-center-container">
             <div class="throwed-cards-container">
-                <img [src]="'assets/Cards/' + game.lastCard['card']" alt="" [style.transform]="'rotate(0deg)'" class="firstcard">
-                <img *ngFor="let card of game.throwedCards; let i = index" [src]="'assets/Cards/' + card.card" alt="" [style.transform]="'rotate(' + card.offset + 'deg)'">
+                <img *ngIf="firestoreService?.onlineGame?.lastCard" [src]="'assets/Cards/' + firestoreService?.onlineGame?.lastCard['card']" alt="" [style.transform]="'rotate(0deg)'" class="firstcard">
+                <img *ngFor="let card of firestoreService.game?.throwedCards; let i = index" [src]="'assets/Cards/' + card.card" alt="" [style.transform]="'rotate(' + card.offset + 'deg)'">
             </div>
             <div class="stack-container">
                 <img src="assets/d9gnihf-ec16caeb-ec9c-4870-9480-57c7711d844f.png" alt="" (click)="pickCard()">
@@ -15,8 +15,8 @@
         <div class="player-four-container"></div>
     </div>
     <div class="bottom-layer">
-        <div class="my-cards" [ngStyle]="{'width.px': 90 + (41 * myCards.length)}">
-            <img *ngFor="let card of myCards; let i = index" src="assets/Cards/{{ card.card }}" alt="" [ngStyle]="{'left.px': i * 38 + 10}" id="myCard{{ i }}" [class.throwCard]="card.throw" (click)="checkIfCardThrowable(i)">
+        <div class="my-cards" [ngStyle]="{'width.px': 90 + (41 * myCards?.length)}">
+            <img *ngFor="let card of myCards; let i = index" src="assets/Cards/{{ card?.card }}" alt="" [ngStyle]="{'left.px': i * 38 + 10}" id="myCard{{ i }}" [class.throwCard]="card.throw" (click)="checkIfCardThrowable(i)">
         </div>
     </div>
 </div>
