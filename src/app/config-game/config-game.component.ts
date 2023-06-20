@@ -43,7 +43,7 @@ export class ConfigGameComponent implements OnInit {
   }
 
   enterWaitingroom() {
-    this.router.navigateByUrl('/waitingroom/P4ipHCPYOzyQU3u9reBu/' + this.player)
+    this.router.navigateByUrl('/waitingroom/'+ this.gameId + '/' + this.player)
   }
   
   snapPlayersJoinedGame() {

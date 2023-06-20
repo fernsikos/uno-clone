@@ -164,5 +164,7 @@ export class Game {
         return Math.floor(Math.random() * 361)
     }
 
+    
+
 
 }

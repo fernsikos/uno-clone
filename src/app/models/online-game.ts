@@ -3,11 +3,26 @@ export class OnlineGame {
     public lastCard: object;
     public currentColor: string;
     public stack: any[] = [];
+    public firstCard: object;
 
 
     
 
     updateCurrentColor() {
-        this.currentColor = this.lastCard['color'];
+        if (this.lastCard) {
+            this.currentColor = this.lastCard['color'];
+        } else {
+            setTimeout(() => {
+                this.currentColor = this.lastCard['color'];
+                console.log('timeout used')
+            }, 1000);
+        }
     }
+
+    pickFirstCard() {
+        this.lastCard = this.stack[0];
+        this.updateCurrentColor();
+    }
+
+    
 }

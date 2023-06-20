@@ -4,6 +4,9 @@ import { Rules } from '../models/rules';
 import { OnlineGame } from '../models/online-game';
 import { ActivatedRoute } from '@angular/router';
 import { FirestoreService } from '../firestore.service';
+import { DocumentData, DocumentReference, collection, doc, getDoc, getDocs, getFirestore, onSnapshot, setDoc } from 'firebase/firestore';
+import { environment } from 'src/environments/environment';
+import { initializeApp } from 'firebase/app';
 
 
 @Component({
@@ -14,9 +17,10 @@ import { FirestoreService } from '../firestore.service';
 export class GameboardComponent implements OnInit {
 
   playerNumber: number;
-  gameId: string;
   rules: Rules;
   toDrawcount: number = 1;
+  app = initializeApp(environment.firebase)
+  db: any = getFirestore(this.app)
   public pickCardAnimation: boolean = false;
   public cardInThrow: string;
   myCards: any[] = [];
@@ -26,29 +30,64 @@ export class GameboardComponent implements OnInit {
 
   async ngOnInit() {
     this.route.params.subscribe(params => {
-      this.gameId = params['id'];
+      this.firestoreService.gameId = params['id'];
       this.playerNumber = params['player']
     })
-    this.firestoreService.game = new Game();
+    this.firestoreService.game = new Game(); //Eventuell nur player 1
     this.firestoreService.onlineGame = new OnlineGame();
     if (this.playerNumber == 1) {
-      this.firestoreService.pushGameToFirestore(this.gameId);
+      await this.firestoreService.pushGameToFirestore(this.firestoreService.gameId);
     } 
-    
-    await this.firestoreService.loadStackFromFirestore(this.gameId)
-    
+    await this.firestoreService.loadStackFromFirestore(this.firestoreService.gameId);
+    await this.checkIfCardsLoaded(this.firestoreService);
+    await this.firestoreService.loadfFirstcard()
     this.rules = new Rules();
-    // this.firestoreService.onlineGame.stack = this.firestoreService.testStack;
-    this.firestoreService.pickFirstCard();
+    this.firestoreService.onlineGame.pickFirstCard();
     this.pickInitialCards();
   }
 
- 
+ checkIfCardsLoaded(service) {
+  return new Promise<void>((resolve) => {
+    function check() {
+      if (service.onlineGame.stack.length > 1) {
+        resolve()
+      } else {
+        setTimeout(check, 500)
+      }
+    }
+    check()
+  })
+ }
 
-  pickInitialCards() {
-    for (let i = this.playerNumber * 7; i < this.playerNumber * 7 + 7; i++) {
-      const element = this.firestoreService.testStack[i];
-      this.myCards.push(element)
+  async pickInitialCards() {
+    let playerMe = await getDoc(doc(this.db, 'games', this.firestoreService.gameId, 'player', this.playerNumber.toString()))
+    const gameRef = doc(this.db, 'games', this.firestoreService.gameId);
+    const playerRef = doc(gameRef, 'player', this.playerNumber.toString());
+    const initialCardsCollectionRef = collection(playerRef, 'initialCards')
+    const InitialCardsSnap = await getDocs(initialCardsCollectionRef)
+
+    // if (playerMe.data()['initialCards']) {
+    //   const cards = playerMe.data()['initialCards'];
+    //   for (let index = 0; index < cards.length; index++) {
+    //     this.myCards.push(cards[index])
+    //   }
+    //   console.log('my Cards loaded to firestore')
+    // }
+    if (InitialCardsSnap.size > 0) {
+      InitialCardsSnap.docs.forEach((doc) => {
+        console.log(doc.data())
+        this.myCards.push(doc.data())
+      })
+    }
+    
+    
+    else {
+      for (let i = this.playerNumber * 7; i < this.playerNumber * 7 + 7; i++) {
+        const element = this.firestoreService.onlineGame.stack[i];
+        this.myCards.push(element);
+        this.firestoreService.deleteCardFromStack(this.firestoreService.gameId,element.id)
+      }
+      this.firestoreService.pushMyCardsToFirestore(this.playerNumber.toString(), this.myCards)
     }
   }
 
@@ -98,3 +137,7 @@ export class GameboardComponent implements OnInit {
   }
 
 }
+function getCollections(playerRef: DocumentReference<DocumentData>) {
+  throw new Error('Function not implemented.');
+}
+

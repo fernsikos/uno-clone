@@ -34,6 +34,7 @@ export class WaitingroomComponent implements OnInit {
 
   }
 
+
   snapPlayersJoinedGame() {
     onSnapshot(collection(this.db, 'games', this.gameId, 'player'), async (snapshot) => {
       snapshot.docChanges().forEach(async(change) => {
@@ -54,7 +55,7 @@ export class WaitingroomComponent implements OnInit {
 
   startGame() {
     if (this.joinedPlayers.length > 1){
-      this.router.navigateByUrl('/waitingroom/P4ipHCPYOzyQU3u9reBu/' + this.playerNumer)
+      this.router.navigateByUrl('/waitingroom/' + this.gameId + '/' + this.playerNumer)
     }
   }
 
@@ -78,7 +79,7 @@ export class WaitingroomComponent implements OnInit {
   }
 
   enterGame() {
-    this.router.navigateByUrl('/game/P4ipHCPYOzyQU3u9reBu/' + this.playerNumer)
+    this.router.navigateByUrl('/game/'+ this.gameId + '/' + this.playerNumer)
   }
 
 }
