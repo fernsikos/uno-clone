@@ -63,8 +63,8 @@ export class ConfigGameComponent implements OnInit {
   }
 
   removePlayer(change) {
-    let playerToREemove = this.joinedPlayers.findIndex(m => m.number === change.doc.data()['number']);
-    this.joinedPlayers.splice(playerToREemove, 1)
+    let playerToRemove = this.joinedPlayers.findIndex(m => m.number === change.doc.data()['number']);
+    this.joinedPlayers.splice(playerToRemove, 1)
   }
 
 }

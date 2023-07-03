@@ -36,13 +36,13 @@ export class GameboardComponent implements OnInit {
     this.firestoreService.game = new Game(); //Eventuell nur player 1
     this.firestoreService.onlineGame = new OnlineGame();
     if (this.playerNumber == 1) {
-      await this.firestoreService.pushGameToFirestore(this.firestoreService.gameId);
+      await this.firestoreService.pushGameToFirestore();
     } 
     await this.firestoreService.loadStackFromFirestore(this.firestoreService.gameId);
     await this.checkIfCardsLoaded(this.firestoreService);
-    await this.firestoreService.loadfFirstcard()
+    await this.firestoreService.loadfFirstcard();
+    await this.firestoreService.snapGameChanges();
     this.rules = new Rules();
-    this.firestoreService.onlineGame.pickFirstCard();
     this.pickInitialCards();
   }
 
@@ -60,27 +60,15 @@ export class GameboardComponent implements OnInit {
  }
 
   async pickInitialCards() {
-    let playerMe = await getDoc(doc(this.db, 'games', this.firestoreService.gameId, 'player', this.playerNumber.toString()))
-    const gameRef = doc(this.db, 'games', this.firestoreService.gameId);
-    const playerRef = doc(gameRef, 'player', this.playerNumber.toString());
-    const initialCardsCollectionRef = collection(playerRef, 'initialCards')
-    const InitialCardsSnap = await getDocs(initialCardsCollectionRef)
+    const playerRef = doc(this.db, 'games', this.firestoreService.gameId, 'player', this.playerNumber.toString());
+    const myCardsCollectionRef = collection(playerRef, 'myCards')
+    const myCardsSnap = await getDocs(myCardsCollectionRef)
 
-    // if (playerMe.data()['initialCards']) {
-    //   const cards = playerMe.data()['initialCards'];
-    //   for (let index = 0; index < cards.length; index++) {
-    //     this.myCards.push(cards[index])
-    //   }
-    //   console.log('my Cards loaded to firestore')
-    // }
-    if (InitialCardsSnap.size > 0) {
-      InitialCardsSnap.docs.forEach((doc) => {
-        console.log(doc.data())
+    if (myCardsSnap.size > 0) {
+      myCardsSnap.docs.forEach((doc) => {
         this.myCards.push(doc.data())
       })
     }
-    
-    
     else {
       for (let i = this.playerNumber * 7; i < this.playerNumber * 7 + 7; i++) {
         const element = this.firestoreService.onlineGame.stack[i];
@@ -89,6 +77,7 @@ export class GameboardComponent implements OnInit {
       }
       this.firestoreService.pushMyCardsToFirestore(this.playerNumber.toString(), this.myCards)
     }
+    
   }
 
   pickCard() {
@@ -111,7 +100,8 @@ export class GameboardComponent implements OnInit {
     if(returnData['pass']) {
       this.updateGameVariables(returnData)
       this.throwCard(i);
-      this.updateLastCard(i)
+      this.firestoreService.updateLastCard(this.myCards[i])
+      // this.firestoreService.pushCardToThrowedCardsFirestore(this.myCards[i])
     }
   }
 
@@ -124,20 +114,21 @@ export class GameboardComponent implements OnInit {
     }
   }
 
-  updateLastCard(i) {
-    this.firestoreService.onlineGame.lastCard = this.myCards[i]
-  }
+  // updateLastCard(i) {
+  //   this.firestoreService.onlineGame.lastCard = this.myCards[i]
+  // }
 
   throwCard(i) {
     this.myCards[i].throw = true
     setTimeout(() => {
-      this.firestoreService.game.throwedCards.push(this.myCards[i])
-      this.myCards.splice(i, 1)
+      this.firestoreService.onlineGame.throwedCards.push(this.myCards[i]);
+      this.firestoreService.pushCardToThrowedCardsFirestore(this.myCards[i]);
+      this.myCards.splice(i, 1);
     }, 500);
   }
 
 }
-function getCollections(playerRef: DocumentReference<DocumentData>) {
-  throw new Error('Function not implemented.');
-}
+// function getCollections(playerRef: DocumentReference<DocumentData>) {
+//   throw new Error('Function not implemented.');
+// }
 

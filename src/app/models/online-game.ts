@@ -3,6 +3,7 @@ export class OnlineGame {
     public lastCard: object;
     public currentColor: string;
     public stack: any[] = [];
+    public throwedCards: any = [];
     public firstCard: object;
 
 
@@ -19,10 +20,6 @@ export class OnlineGame {
         }
     }
 
-    pickFirstCard() {
-        this.lastCard = this.stack[0];
-        this.updateCurrentColor();
-    }
 
     
 }

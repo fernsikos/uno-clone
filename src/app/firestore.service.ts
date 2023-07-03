@@ -20,7 +20,6 @@ export class FirestoreService implements OnInit {
   game: Game;
   gameId: string;
   onlineGame: OnlineGame;
-  testStack: any = []
 
   constructor() {
   }
@@ -28,14 +27,14 @@ export class FirestoreService implements OnInit {
   ngOnInit() {
   }
 
-  async pushGameToFirestore(id) {
-    await this.pushFirstCardToFirestore(this.gameId);
-    await this.pushStackToFirestore(this.gameId);
+  async pushGameToFirestore() {
+    await this.pushFirstCardToFirestore();
+    await this.pushStackToFirestore();
 
   }
 
-  async pushStackToFirestore(id) {
-    const collectionRef = collection(this.db, 'games', id, 'stack');
+  async pushStackToFirestore() {
+    const collectionRef = collection(this.db, 'games', this.gameId, 'stack');
 
     try {
       const querySnapshot = await getDocs(collectionRef);
@@ -43,35 +42,41 @@ export class FirestoreService implements OnInit {
         this.game.stack.forEach(async (card) => {
           await addDoc(collectionRef, card);
         });
-      } else {
-        console.log('Die Sammlung "stack" existiert bereits, keine neue karten Hinzugefügt');
-      }
+      } 
     } catch (error) {
       console.log('Fehler beim Überprüfen der Sammlung:', error);
     }
   }
 
   async pushMyCardsToFirestore(playerMe, myCards) {
-    const collectionRef = collection(this.db, 'games', this.gameId, 'player', playerMe, 'initialCards')
+    const collectionRef = collection(this.db, 'games', this.gameId, 'player', playerMe, 'myCards')
 
     try {
       myCards.forEach(async card => {
-        await addDoc(collectionRef, card);
+        const docRef = doc(collectionRef, card.id);
+        await setDoc(docRef, card);
       });
     } catch (error) {
-      console.log('Fehler beim Überprüfen der Sammlung:', error);      
+      console.log('Fehler beim Überprüfen der Sammlung:', error);
     }
-    console.log('my Cards added to firestore')
+    
   }
 
 
-  async pushFirstCardToFirestore(id) {
-    await setDoc(doc(this.db, 'games', this.gameId), {
-      firstcard: this.game.stack[0]
-    })
-    this.game.stack.splice(0, 1)
+  /**
+   * Checkes if the game already has a firstcard and pushes one if false
+   */
+  async pushFirstCardToFirestore() {
+    const gameRef = doc(this.db, 'games', this.gameId)
+    const gameSnap = await getDoc(gameRef)
+    if (!gameSnap.data()['firstcard']) {
+      await updateDoc(doc(this.db, 'games', this.gameId), {
+        firstcard: this.game.stack[0],
+        lastCard: this.game.stack[0]
+      })
+      this.game.stack.splice(0, 1)
+    }
   }
-
 
 
 
@@ -98,11 +103,40 @@ export class FirestoreService implements OnInit {
 
   async loadfFirstcard() {
     let firstcard = await getDoc(doc(this.db, 'games', this.gameId));
-    this.onlineGame.firstCard = firstcard.data()['firstcard']
+    this.onlineGame.firstCard = firstcard.data()['firstcard'];
+    // this.onlineGame.lastCard = this.onlineGame.firstCard; /// auf snap umwandeln
+    // this.onlineGame.updateCurrentColor();
+  }
+
+  async snapGameChanges() {
+    onSnapshot(doc(this.db, 'games', this.gameId), async (snapshot) => {
+      this.onlineGame.lastCard = snapshot.data()['lastCard']
+      console.log('recieved change on game:',snapshot.data())
+    })
+    this.snapThrowedCards()
   }
 
   async handOutCards() {
     let players = await getDocs(collection(this.db, 'games', this.gameId, 'player'));
-    console.log(players)
+  }
+
+  async updateLastCard(card) {
+    await updateDoc(doc(this.db, 'games', this.gameId), {lastCard: card})
+  }
+
+  pushCardToThrowedCardsFirestore(card) {
+    setDoc(doc(this.db, 'games', this.gameId, 'throwedCards', card.id), card)
+  }
+
+  async snapThrowedCards() {
+    await onSnapshot(collection(this.db, 'games', this.gameId, 'throwedCards'), async (snapshot) => {
+      snapshot.docs.forEach(async (doc) => {
+        const cardAlreadyExists = this.onlineGame.throwedCards.some((card) => card.id === doc.data()['id']);
+        if (!cardAlreadyExists) {
+          this.onlineGame.throwedCards.push(doc.data())
+        }
+        // console.log('incoming throwed cards change:', doc.data())
+      })
+    })
   }
 }

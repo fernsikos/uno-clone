@@ -1,6 +1,6 @@
 export class Game {
     public stack: any[] = [];
-    public throwedCards: any = [];
+    // public throwedCards: any = [];
     public types: string[] = [
         "blue", "green", "yellow", "red"
     ];

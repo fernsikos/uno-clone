@@ -5,7 +5,7 @@
         <div class="game-center-container">
             <div class="throwed-cards-container">
                 <img *ngIf="firestoreService?.onlineGame?.firstCard" [src]="'assets/Cards/' + firestoreService?.onlineGame?.firstCard['card']" alt="" [style.transform]="'rotate(0deg)'" class="firstcard">
-                <img *ngFor="let card of firestoreService.game?.throwedCards; let i = index" [src]="'assets/Cards/' + card.card" alt="" [style.transform]="'rotate(' + card.offset + 'deg)'">
+                <img *ngFor="let card of firestoreService.onlineGame?.throwedCards; let i = index" [src]="'assets/Cards/' + card.card" alt="" [style.transform]="'rotate(' + card.offset + 'deg)'">
             </div>
             <div class="stack-container">
                 <img src="assets/d9gnihf-ec16caeb-ec9c-4870-9480-57c7711d844f.png" alt="" (click)="pickCard()">
