@@ -2,12 +2,14 @@ export class Rules {
 
     lastCard: object;
     throwedCard: object;
+    activeColor: any;
     public returnData: any;
        
 
-    compareCards(throwedCard: object, lastCard: object) {
+    compareCards(throwedCard: object, lastCard: object, activeColor:any) {
         this.lastCard = lastCard;
         this.throwedCard = throwedCard;
+        this.activeColor = activeColor;
         this.returnData = {
             pass: false,
             activateColorWheel: false
@@ -15,6 +17,7 @@ export class Rules {
         console.log(lastCard['number']+ ' ' + lastCard['color'] + ' lastcard')
         console.log(throwedCard['number']+ ' ' + throwedCard['color'] + ' throwedcard')
         this.preCheck();
+        console.log(activeColor, 'active color')
         return this.returnData
     }
 
@@ -61,6 +64,7 @@ export class Rules {
         if (this.throwedCard['special'] === '+4') {
             this.returnData.draw = 4;
             this.returnData.pass = true;
+            this.returnData.activateColorWheel = true;
         } else if (this.throwedCard['special'] === 'wild' && this.lastCard['special'] === 'wild') {
             this.returnData.pass = true;
             this.returnData.activateColorWheel = true;

@@ -21,6 +21,8 @@ export class FirestoreService implements OnInit {
   gameId: string;
   onlineGame: OnlineGame;
   playerNumber:any;
+  activeColor: string;
+  drawCount: number = 1;
   public colorWheelAnimation: boolean = false;
   public colorWheel: boolean = false;
 
@@ -96,7 +98,7 @@ export class FirestoreService implements OnInit {
       for (let i = playerNumber * 7; i < playerNumber * 7 + 7; i++) {
         const element = this.onlineGame.stack[i];
         myCards.push(element);
-        this.deleteCardFromStack(this.gameId,element.id)
+        this.deleteCardFromStack(element.id)
       }
       this.pushMyCardsToFirestore(playerNumber.toString(), myCards)
     }
@@ -106,16 +108,23 @@ export class FirestoreService implements OnInit {
     deleteDoc(doc(this.db, 'games', this.gameId, 'player', this.playerNumber, 'myCards', id))
   }
 
-  loadStackFromFirestore(id) {
+  loadStackFromFirestore() {
     return new Promise<void>((resolve) => {
-      onSnapshot(collection(this.db, 'games', id, 'stack'), async (snapshot) => {
+      onSnapshot(collection(this.db, 'games', this.gameId, 'stack'), async (snapshot) => {
         snapshot.docChanges().forEach(async (change) => {
           if (change.type == 'added') {
             const dataWithId = { ...change.doc.data(), id: change.doc.id }
             this.onlineGame.stack.push(dataWithId);
           } else if (change.type == 'removed') {
+            console.log('delete incoming')
             let cardToRemove = this.onlineGame.stack.findIndex(c => c.card == change.doc.data()['card']);
+            console.log('card To Remove   ', cardToRemove, 'card that be found:  ' , this.onlineGame.stack[cardToRemove], 'stack länge :', this.onlineGame.stack.length)
             this.onlineGame.stack.splice(cardToRemove, 1)
+            console.log('stack länge ',this.onlineGame.stack.length)
+            // console.log('card to delete ', cardToRemove)
+            // console.log(this.onlineGame.stack[cardToRemove])
+            // this.onlineGame.stack.splice(cardToRemove, 1)
+            // console.log(this.onlineGame.stack.length)
           }
         })
         resolve()
@@ -123,15 +132,14 @@ export class FirestoreService implements OnInit {
     })
   }
 
-  deleteCardFromStack(gameId, cardId) {
-    deleteDoc(doc(this.db, 'games', gameId, 'stack', cardId))
+  deleteCardFromStack(cardId) {
+    console.log('stack' , cardId)
+    deleteDoc(doc(this.db, 'games', this.gameId, 'stack', cardId))
   }
 
   async loadfFirstcard() {
     let firstcard = await getDoc(doc(this.db, 'games', this.gameId));
     this.onlineGame.firstCard = firstcard.data()['firstcard'];
-    // this.onlineGame.lastCard = this.onlineGame.firstCard; /// auf snap umwandeln
-    // this.onlineGame.updateCurrentColor();
   }
 
   async snapGameChanges() {
@@ -140,13 +148,19 @@ export class FirestoreService implements OnInit {
         this.onlineGame.lastCard = snapshot.data()['lastCard']
       }
       if(snapshot.data()['colorWheelAnimation']) {
-        console.log(this.colorWheel + ' colorwheel')
-        console.log(this.colorWheelAnimation + 'colorwheelanimation')
         if(!this.colorWheel) {
           this.colorWheelAnimation = snapshot.data()['colorWheelAnimation']
         } 
-        console.log(this.colorWheel + ' colorwheel')
-        console.log(this.colorWheelAnimation + 'colorwheelanimation')
+      }
+      if(!snapshot.data()['colorWheelAnimation']) {
+        this.colorWheelAnimation = false
+      }
+      if(snapshot.data()['activeColor']) {
+        this.activeColor = snapshot.data()['activeColor']
+      }
+      if(snapshot.data()['drawCount']) {
+        this.drawCount = snapshot.data()['drawCount']
+        console.log('new draw count ' + snapshot.data()['drawCount'])
       }
       console.log('recieved change on game:',snapshot.data())
     })
@@ -161,6 +175,14 @@ export class FirestoreService implements OnInit {
     updateDoc(doc(this.db, 'games', this.gameId), {colorWheelAnimation: false})
   }
 
+  setActiveColorFirestore(color) { 
+    updateDoc(doc(this.db, 'games', this.gameId), {activeColor: color})
+  }
+
+  updateDrawCountFirestore(count) {
+    updateDoc(doc(this.db, 'games', this.gameId), {drawCount: count})
+  }
+
   async handOutCards() {
     let players = await getDocs(collection(this.db, 'games', this.gameId, 'player'));
   }
@@ -171,6 +193,10 @@ export class FirestoreService implements OnInit {
 
   pushCardToThrowedCardsFirestore(card) {
     setDoc(doc(this.db, 'games', this.gameId, 'throwedCards', card.id), card)
+  }
+
+  pushPickedCardToMyCardsFirestore(card) {
+    setDoc(doc(this.db,'games', this.gameId, 'player', this.playerNumber, 'myCards', card.id), card)
   }
 
   async snapThrowedCards() {

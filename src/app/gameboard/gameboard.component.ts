@@ -29,7 +29,7 @@ export class GameboardComponent implements OnInit {
 
   // playerNumber: number;
   rules: Rules;
-  toDrawcount: number = 1;
+  
   app = initializeApp(environment.firebase)
   db: any = getFirestore(this.app)
   myCards: any[] = [];
@@ -51,7 +51,7 @@ export class GameboardComponent implements OnInit {
     if (this.firestoreService.playerNumber == 1) {
       await this.firestoreService.pushGameToFirestore();
     } 
-    await this.firestoreService.loadStackFromFirestore(this.firestoreService.gameId);
+    await this.firestoreService.loadStackFromFirestore();
     await this.checkIfCardsLoaded(this.firestoreService);
     await this.firestoreService.loadfFirstcard();
     await this.firestoreService.snapGameChanges();
@@ -77,44 +77,48 @@ export class GameboardComponent implements OnInit {
     this.pickCardAnimation = true;
     setTimeout(() => {
       this.pickCardAnimation = false;
-      for (let i = 0; i < this.toDrawcount; i++) {
-        this.myCards.push(this.firestoreService.onlineGame.stack[this.firestoreService.onlineGame.stack.length - 1]);
-        console.log(this.firestoreService.onlineGame.stack[this.firestoreService.onlineGame.stack.length - 1])
-        this.firestoreService.onlineGame.stack.pop();
+      for (let i = 0; i < this.firestoreService.drawCount; i++) {
+        const cardToDelete = this.firestoreService.onlineGame.stack[i]
+        this.myCards.push(cardToDelete);
+        this.firestoreService.pushPickedCardToMyCardsFirestore(cardToDelete);
+        // this.firestoreService.onlineGame.stack.pop();
+        this.firestoreService.deleteCardFromStack(cardToDelete['id'])
       }
-      if(this.toDrawcount > 1) {
-        this.toDrawcount = 1
+      if(this.firestoreService.drawCount > 1) {
+        this.firestoreService.drawCount = 1;
+        this.firestoreService.updateDrawCountFirestore(this.firestoreService.drawCount)
       }
     }, 1500);
     
   }
 
   checkIfCardThrowable(i) {
-    let returnData = this.rules.compareCards(this.myCards[i], this.firestoreService.onlineGame.lastCard)
+    let returnData = this.rules.compareCards(this.myCards[i], this.firestoreService.onlineGame.lastCard, this.firestoreService.activeColor)
     if(returnData['pass']) {
       if(!returnData['activateColorWheel']) {
-        this.updateGameVariables(returnData)
+        // this.updateGameVariables(returnData)
+        this.updateDrawcount(returnData)
         this.throwCard(i);
         this.firestoreService.updateLastCard(this.myCards[i])
       } else {
+        this.updateDrawcount(returnData);
         this.showColorPalette(returnData, i);
         this.firestoreService.startColorWheelAnimation();
       }
     }
   }
 
-  updateGameVariables(returnData) {
-    if(returnData['draw']) {
-      if (this.toDrawcount > 1) {
-        this.toDrawcount = this.toDrawcount + returnData['draw']
-      } else
-      this.toDrawcount = returnData.draw
+  updateDrawcount(returnData) {
+    if(returnData.draw) {
+      let newDrawCount: number;
+      if(this.firestoreService.drawCount === 1) {
+        newDrawCount = returnData.draw
+      } else {
+        newDrawCount = this.firestoreService.drawCount + returnData.draw;
+      }
+      this.firestoreService.updateDrawCountFirestore(newDrawCount)
     }
   }
-
-  // updateLastCard(i) {
-  //   this.firestoreService.onlineGame.lastCard = this.myCards[i]
-  // }
 
   throwCard(i) {
     this.myCards[i].throw = true
@@ -123,6 +127,7 @@ export class GameboardComponent implements OnInit {
       this.firestoreService.pushCardToThrowedCardsFirestore(this.myCards[i]);
       this.firestoreService.deleteCardFromMyCardsFirestore(this.myCards[i].id);
       this.myCards.splice(i, 1);
+      this.firestoreService.setActiveColorFirestore('none')
     }, 500);
   }
 
@@ -130,11 +135,11 @@ export class GameboardComponent implements OnInit {
     this.firestoreService.colorWheel = true;
     this.throwCard(i);
     this.firestoreService.updateLastCard(this.myCards[i])
-    this.updateGameVariables(returnData)
+    // this.updateGameVariables(returnData)
   }
 
   chooseColor(color) {
-    console.log('color ' + color + ' choosen')
+    this.firestoreService.setActiveColorFirestore(color);
     this.firestoreService.colorWheel = false;
     this.firestoreService.stopColorWheelAnimation()
   }

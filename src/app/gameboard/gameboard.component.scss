@@ -2,19 +2,6 @@
     overflow: hidden;
 }
 
-// .fadeOut {
-//     animation: fadeOut 0.5s ease-in forwards;
-// }
-
-// @keyframes fadeOut {
-//     from {
-//         opacity: 1 !important;
-//     }
-//     to {
-//         opacity: 0 !important;
-//     }
-// }
-
 .gameboard {
     background-image: url("~src/assets/background-gd67c8c145_1920.jpg");
     height: 100vh;
@@ -31,6 +18,22 @@
     img {
         height: 158px;
         width: 105px;
+    }
+
+    .top-layer {
+        width: 100vw;
+        height: 70px;
+        background-color: rgba(39, 39, 39, 0.456);
+        display: flex;
+        align-items: center;
+        padding-left: 24px;
+
+        .color-box {
+            height: 50px;
+            width: 100px;
+            background-color: black;
+            border-radius: 10px;
+        }
     }
 
     .middle-layer {

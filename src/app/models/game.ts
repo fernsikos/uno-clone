@@ -8,12 +8,12 @@ export class Game {
 
     constructor() {
        
-        // for (let i = 0; i < this.types.length; i++) {
-        //     const element = this.types[i];
-        //     this.pushZeroToNine(element);
-        //     this.pushOneToNine(element);
-        //     this.pushSpecials(element);
-        // }
+        for (let i = 0; i < this.types.length; i++) {
+            const element = this.types[i];
+            this.pushZeroToNine(element);
+            this.pushOneToNine(element);
+            this.pushSpecials(element);
+        }
         this.pushWilds();
         this.shuffle(this.stack);
         
@@ -128,7 +128,7 @@ export class Game {
      * Pushes wild cards to array
      */
     pushWilds() {
-        for (let i = 0; i < 15; i++) {//developer purpose changed 4 to 15
+        for (let i = 0; i < 4; i++) {
             this.pushWild();
             this.pushWildDraw();
         }
