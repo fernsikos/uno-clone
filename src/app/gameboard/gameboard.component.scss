@@ -2,6 +2,19 @@
     overflow: hidden;
 }
 
+// .fadeOut {
+//     animation: fadeOut 0.5s ease-in forwards;
+// }
+
+// @keyframes fadeOut {
+//     from {
+//         opacity: 1 !important;
+//     }
+//     to {
+//         opacity: 0 !important;
+//     }
+// }
+
 .gameboard {
     background-image: url("~src/assets/background-gd67c8c145_1920.jpg");
     height: 100vh;
@@ -38,14 +51,14 @@
 
                 .firstcard {
 
-                    animation: firstcard 1s ease-in-out  !important;
+                    animation: firstcard 1s ease-in-out !important;
                 }
 
                 @keyframes throwFromBottom {
-                    
+
                     0% {
                         transform: translateY(1000px) rotate(-10deg) translateX(300px);
-                        
+
                     }
                 }
 
@@ -76,7 +89,7 @@
                 }
 
                 @keyframes pickCardAnimation {
-                    
+
                     0% {
                         transform: translateY(0);
                     }
@@ -99,7 +112,7 @@
         .my-cards {
 
             max-width: calc(100vw - 100px);
-            overflow-y:hidden;
+            overflow-y: hidden;
             overflow-x: hidden;
             position: relative;
             scrollbar-gutter: stable both-edges;
@@ -125,7 +138,7 @@
         }
 
         @keyframes getCardAnimation {
-            
+
             0% {
                 transform: translateY(120%)
             }
@@ -143,6 +156,88 @@
             100% {
                 transform: translateY(120%)
             }
+        }
+    }
+
+    .color-wheel-container {
+        background-color: rgba(158, 158, 158, 0.594);
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        // animation: fade-in 0.5s ease-in forwards;
+
+        h1 {
+            margin: 0;
+            margin-bottom: 25px;
+        }
+
+        .color-wheel {
+            margin: 10px 20px;
+            padding: 25px 25px;
+            border-radius: 20px;
+            background-color: black;
+            color: white;
+            text-align: center;
+
+            .wheel-container, .animated-wheel-container{
+                display: flex;
+                flex-direction: column;
+
+                .top,
+                .bottom {
+                    display: flex;
+                    justify-content: center;
+                }
+
+                .color {
+                    height: 100px;
+                    width: 100px;
+                    margin: 7px;
+                    cursor: pointer;
+
+                    &:hover {
+                        transition: transform ease-in-out 0.125s;
+                        transform: scale(1.05);
+                        // color: aliceblue !important;
+                    }
+                }
+            }
+
+            .animated-wheel-container{
+                animation: turntable 5s linear infinite;
+
+                .color {
+                    cursor: auto;
+
+                    &:hover {
+                        transform: none !important;
+                    }
+                }
+            }
+        }
+    }
+
+    @keyframes turntable {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes fade-in {
+        0% {
+            opacity: 0;
+        }
+
+        100% {
+            opacity: 1;
         }
     }
 }

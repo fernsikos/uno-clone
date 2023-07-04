@@ -2,6 +2,7 @@
 body {
     margin: 0;
     overflow: hidden;
+    font-family: Lato, "Lato", sans-serif;
 }
 
 ::-webkit-scrollbar {
@@ -20,3 +21,12 @@ body {
   ::-webkit-scrollbar-thumb:hover {
     background: #555; /* Farbe des Scrollbalken-Thumb bei Hover */
   }
+
+  /* lato-regular - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/assets/fonts/lato-v24-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}

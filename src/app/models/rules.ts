@@ -9,7 +9,8 @@ export class Rules {
         this.lastCard = lastCard;
         this.throwedCard = throwedCard;
         this.returnData = {
-            pass: false
+            pass: false,
+            activateColorWheel: false
         }
         console.log(lastCard['number']+ ' ' + lastCard['color'] + ' lastcard')
         console.log(throwedCard['number']+ ' ' + throwedCard['color'] + ' throwedcard')
@@ -61,9 +62,11 @@ export class Rules {
             this.returnData.draw = 4;
             this.returnData.pass = true;
         } else if (this.throwedCard['special'] === 'wild' && this.lastCard['special'] === 'wild') {
-            this.returnData.pass = true
+            this.returnData.pass = true;
+            this.returnData.activateColorWheel = true;
         } else if (this.throwedCard['special'] === 'wild' && !this.lastCard['special']) {
-            this.returnData.pass = true
+            this.returnData.pass = true;
+            this.returnData.activateColorWheel = true;
         }
     }
 }

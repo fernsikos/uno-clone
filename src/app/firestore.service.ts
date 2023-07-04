@@ -20,6 +20,10 @@ export class FirestoreService implements OnInit {
   game: Game;
   gameId: string;
   onlineGame: OnlineGame;
+  playerNumber:any;
+  public colorWheelAnimation: boolean = false;
+  public colorWheel: boolean = false;
+
 
   constructor() {
   }
@@ -78,7 +82,29 @@ export class FirestoreService implements OnInit {
     }
   }
 
+  async pickInitialCards(myCards, playerNumber) {
+    const playerRef = doc(this.db, 'games', this.gameId, 'player', playerNumber.toString());
+    const myCardsCollectionRef = collection(playerRef, 'myCards')
+    const myCardsSnap = await getDocs(myCardsCollectionRef)
 
+    if (myCardsSnap.size > 0) {
+      myCardsSnap.docs.forEach((doc) => {
+        myCards.push(doc.data())
+      })
+    }
+    else {
+      for (let i = playerNumber * 7; i < playerNumber * 7 + 7; i++) {
+        const element = this.onlineGame.stack[i];
+        myCards.push(element);
+        this.deleteCardFromStack(this.gameId,element.id)
+      }
+      this.pushMyCardsToFirestore(playerNumber.toString(), myCards)
+    }
+  }
+
+  deleteCardFromMyCardsFirestore(id) {
+    deleteDoc(doc(this.db, 'games', this.gameId, 'player', this.playerNumber, 'myCards', id))
+  }
 
   loadStackFromFirestore(id) {
     return new Promise<void>((resolve) => {
@@ -110,10 +136,29 @@ export class FirestoreService implements OnInit {
 
   async snapGameChanges() {
     onSnapshot(doc(this.db, 'games', this.gameId), async (snapshot) => {
-      this.onlineGame.lastCard = snapshot.data()['lastCard']
+      if(snapshot.data()['lastCard']) {
+        this.onlineGame.lastCard = snapshot.data()['lastCard']
+      }
+      if(snapshot.data()['colorWheelAnimation']) {
+        console.log(this.colorWheel + ' colorwheel')
+        console.log(this.colorWheelAnimation + 'colorwheelanimation')
+        if(!this.colorWheel) {
+          this.colorWheelAnimation = snapshot.data()['colorWheelAnimation']
+        } 
+        console.log(this.colorWheel + ' colorwheel')
+        console.log(this.colorWheelAnimation + 'colorwheelanimation')
+      }
       console.log('recieved change on game:',snapshot.data())
     })
     this.snapThrowedCards()
+  }
+
+  startColorWheelAnimation() {
+    updateDoc(doc(this.db, 'games', this.gameId), {colorWheelAnimation: true})
+  }
+
+  stopColorWheelAnimation() {
+    updateDoc(doc(this.db, 'games', this.gameId), {colorWheelAnimation: false})
   }
 
   async handOutCards() {

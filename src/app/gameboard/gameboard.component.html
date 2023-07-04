@@ -19,4 +19,34 @@
             <img *ngFor="let card of myCards; let i = index" src="assets/Cards/{{ card?.card }}" alt="" [ngStyle]="{'left.px': i * 38 + 10}" id="myCard{{ i }}" [class.throwCard]="card.throw" (click)="checkIfCardThrowable(i)">
         </div>
     </div>
+    <div *ngIf="firestoreService.colorWheelAnimation" class="color-wheel-container" [@fade]="firestoreService.colorWheelAnimation ? 'active' : 'void'">
+        <div class="color-wheel">
+            <h1>The next color is ....</h1>
+            <div class="animated-wheel-container">
+                <div class="top">
+                    <div class="color" [ngStyle]="{'border-top-left-radius': '100%', 'background-color': '#FFAA01'}"></div>
+                    <div class="color" [ngStyle]="{'border-top-right-radius': '100%', 'background-color': '#56AA56'}"></div>
+                </div>
+                <div class="bottom">
+                    <div class="color" [ngStyle]="{'border-bottom-left-radius': '100%', 'background-color': '#5555FD'}"></div>
+                    <div class="color" [ngStyle]="{'border-bottom-right-radius': '100%', 'background-color': '#FF5655'}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="firestoreService.colorWheel" class="color-wheel-container" [@fade]="firestoreService.colorWheel ? 'active' : 'void'">
+        <div class="color-wheel">
+            <h1>Choose your color!</h1>
+            <div class="wheel-container">
+                <div class="top">
+                    <div class="color" [ngStyle]="{'border-top-left-radius': '100%', 'background-color': '#FFAA01'}" (click)="chooseColor('yellow')"></div>
+                    <div class="color" [ngStyle]="{'border-top-right-radius': '100%', 'background-color': '#56AA56'}" (click)="chooseColor('green')"></div>
+                </div>
+                <div class="bottom">
+                    <div class="color" [ngStyle]="{'border-bottom-left-radius': '100%', 'background-color': '#5555FD'}" (click)="chooseColor('blue')"></div>
+                    <div class="color" [ngStyle]="{'border-bottom-right-radius': '100%', 'background-color': '#FF5655'}" (click)="chooseColor('red')"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
