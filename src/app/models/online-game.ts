@@ -9,16 +9,16 @@ export class OnlineGame {
 
     
 
-    updateCurrentColor() {
-        if (this.lastCard) {
-            this.currentColor = this.lastCard['color'];
-        } else {
-            setTimeout(() => {
-                this.currentColor = this.lastCard['color'];
-                console.log('timeout used')
-            }, 1000);
-        }
-    }
+    // updateCurrentColor() {
+    //     if (this.lastCard) {
+    //         this.currentColor = this.lastCard['color'];
+    //     } else {
+    //         setTimeout(() => {
+    //             this.currentColor = this.lastCard['color'];
+    //             console.log('timeout used')
+    //         }, 1000);
+    //     }
+    // }
 
 
     

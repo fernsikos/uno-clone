@@ -87,24 +87,48 @@ export class GameboardComponent implements OnInit {
       if(this.firestoreService.drawCount > 1) {
         this.firestoreService.drawCount = 1;
         this.firestoreService.updateDrawCountFirestore(this.firestoreService.drawCount)
+        this.checkIfNeedExeption();
+        this.firestoreService.setForceDrawFirestore(false)
       }
     }, 1500);
     
   }
 
+  checkIfNeedExeption() {
+    if(this.firestoreService.activeColor === 'none') {
+      this.firestoreService.setActiveColorFirestore('exeption')
+    }
+  }
+
   checkIfCardThrowable(i) {
-    let returnData = this.rules.compareCards(this.myCards[i], this.firestoreService.onlineGame.lastCard, this.firestoreService.activeColor)
+    let returnData = this.rules.compareCards(this.myCards[i], this.firestoreService.onlineGame.lastCard, this.firestoreService.activeColor, this.firestoreService.forceDraw)
     if(returnData['pass']) {
       if(!returnData['activateColorWheel']) {
         // this.updateGameVariables(returnData)
         this.updateDrawcount(returnData)
         this.throwCard(i);
         this.firestoreService.updateLastCard(this.myCards[i])
+        this.checkIfExeptionNeedToReset(returnData)
       } else {
         this.updateDrawcount(returnData);
         this.showColorPalette(returnData, i);
         this.firestoreService.startColorWheelAnimation();
+        this.firestoreService.updateLastCard(this.myCards[i])
+        this.checkIfForceDrawIsSet(returnData)
       }
+    }
+  }
+
+  checkIfForceDrawIsSet(returnData) {
+    if(returnData['forceDraw']) {
+      this.firestoreService.setForceDrawFirestore(true)
+    }
+  }
+
+  checkIfExeptionNeedToReset(returnData) {
+    if(returnData['resetExeption']) {
+      this.firestoreService.setActiveColorFirestore('none')
+
     }
   }
 

@@ -23,6 +23,7 @@ export class FirestoreService implements OnInit {
   playerNumber:any;
   activeColor: string;
   drawCount: number = 1;
+  public forceDraw: boolean;
   public colorWheelAnimation: boolean = false;
   public colorWheel: boolean = false;
 
@@ -75,13 +76,24 @@ export class FirestoreService implements OnInit {
   async pushFirstCardToFirestore() {
     const gameRef = doc(this.db, 'games', this.gameId)
     const gameSnap = await getDoc(gameRef)
+    const indexOfFirstcard = this.pickFirstCard()
     if (!gameSnap.data()['firstcard']) {
       await updateDoc(doc(this.db, 'games', this.gameId), {
-        firstcard: this.game.stack[0],
-        lastCard: this.game.stack[0]
+        firstcard: this.game.stack[indexOfFirstcard],
+        lastCard: this.game.stack[indexOfFirstcard]
       })
-      this.game.stack.splice(0, 1)
+      this.game.stack.splice(indexOfFirstcard, 1)
     }
+  }
+
+  pickFirstCard() {
+    for (let i = 0; i < this.game.stack.length; i++) {
+      const element = this.game.stack[i];
+      if(!element['special']) {
+        return i
+      }
+    }
+    return -1
   }
 
   async pickInitialCards(myCards, playerNumber) {
@@ -116,15 +128,11 @@ export class FirestoreService implements OnInit {
             const dataWithId = { ...change.doc.data(), id: change.doc.id }
             this.onlineGame.stack.push(dataWithId);
           } else if (change.type == 'removed') {
-            console.log('delete incoming')
+            // console.log('delete incoming')
             let cardToRemove = this.onlineGame.stack.findIndex(c => c.card == change.doc.data()['card']);
-            console.log('card To Remove   ', cardToRemove, 'card that be found:  ' , this.onlineGame.stack[cardToRemove], 'stack länge :', this.onlineGame.stack.length)
+            // console.log('card To Remove   ', cardToRemove, 'card that be found:  ' , this.onlineGame.stack[cardToRemove], 'stack länge :', this.onlineGame.stack.length)
             this.onlineGame.stack.splice(cardToRemove, 1)
-            console.log('stack länge ',this.onlineGame.stack.length)
-            // console.log('card to delete ', cardToRemove)
-            // console.log(this.onlineGame.stack[cardToRemove])
-            // this.onlineGame.stack.splice(cardToRemove, 1)
-            // console.log(this.onlineGame.stack.length)
+            // console.log('stack länge ',this.onlineGame.stack.length)
           }
         })
         resolve()
@@ -133,7 +141,7 @@ export class FirestoreService implements OnInit {
   }
 
   deleteCardFromStack(cardId) {
-    console.log('stack' , cardId)
+    // console.log('stack' , cardId)
     deleteDoc(doc(this.db, 'games', this.gameId, 'stack', cardId))
   }
 
@@ -162,7 +170,11 @@ export class FirestoreService implements OnInit {
         this.drawCount = snapshot.data()['drawCount']
         console.log('new draw count ' + snapshot.data()['drawCount'])
       }
-      console.log('recieved change on game:',snapshot.data())
+      if(snapshot.data()['forceDraw']) {
+        this.forceDraw = snapshot.data()['forceDraw']
+        console.log('force draw: ', this.forceDraw)
+      } else this.forceDraw = false;
+      // console.log('recieved change on game:',snapshot.data())
     })
     this.snapThrowedCards()
   }
@@ -177,6 +189,10 @@ export class FirestoreService implements OnInit {
 
   setActiveColorFirestore(color) { 
     updateDoc(doc(this.db, 'games', this.gameId), {activeColor: color})
+  }
+
+  setForceDrawFirestore(state) {
+    updateDoc(doc(this.db, 'games', this.gameId), {forceDraw: state})
   }
 
   updateDrawCountFirestore(count) {
