@@ -1,9 +1,14 @@
 <div class="gameboard">
     <div class="top-layer">
-        <div *ngIf="firestoreService.activeColor === 'yellow'" class="color-box" [ngStyle]="{'background-color': '#FFAA01'}"></div>
-        <div *ngIf="firestoreService.activeColor === 'green'" class="color-box" [ngStyle]="{'background-color': '#56AA56'}"></div>
-        <div *ngIf="firestoreService.activeColor === 'blue'" class="color-box" [ngStyle]="{'background-color': '#5555FD'}"></div>
-        <div *ngIf="firestoreService.activeColor === 'red'" class="color-box" [ngStyle]="{'background-color': '#FF5655'}"></div>
+        <div class="left-top-layer">
+            <div *ngIf="firestoreService.activeColor === 'yellow'" class="color-box" [ngStyle]="{'background-color': '#FFAA01'}"></div>
+            <div *ngIf="firestoreService.activeColor === 'green'" class="color-box" [ngStyle]="{'background-color': '#56AA56'}"></div>
+            <div *ngIf="firestoreService.activeColor === 'blue'" class="color-box" [ngStyle]="{'background-color': '#5555FD'}"></div>
+            <div *ngIf="firestoreService.activeColor === 'red'" class="color-box" [ngStyle]="{'background-color': '#FF5655'}"></div>
+        </div>
+        <div class="right-top-layer">
+            <div *ngIf="firestoreService.drawCount > 1" class="draw-window">Draw {{ firestoreService.drawCount}}</div>
+        </div>
     </div>
     <div class="middle-layer">
         <div class="player-two-container"></div>

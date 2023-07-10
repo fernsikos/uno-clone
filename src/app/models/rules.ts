@@ -16,8 +16,8 @@ export class Rules {
             pass: false,
             activateColorWheel: false
         }
-        console.log(lastCard['number']+ ' ' + lastCard['color'] + ' lastcard')
-        console.log(throwedCard['number']+ ' ' + throwedCard['color'] + ' throwedcard')
+        console.log(lastCard, ' lastcard')
+        console.log(throwedCard, ' throwedcard')
         this.preCheck();
         console.log(activeColor, 'active color')
         return this.returnData
@@ -62,6 +62,11 @@ export class Rules {
         if(this.throwedCard['color'] === this.activeColor) {
             this.returnData.pass = true;
         }
+        if(this.throwedCard['special'] === 'wild') {
+            this.returnData.pass = true,
+            this.returnData.activateColorWheel = true;
+
+        }
     }
 
     checkForSameSpecial() {
@@ -71,7 +76,6 @@ export class Rules {
             this.returnData.pass = true;
             this.returnData.draw = 2
         } 
-        // this.returnData.pass = true
     }
 
     checkForSameColor() {

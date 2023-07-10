@@ -16,6 +16,10 @@ import { ConfigGameComponent } from './config-game/config-game.component';
 import { AngularFireModule } from '@angular/fire/compat';
 import { FormsModule } from '@angular/forms';
 import { WaitingroomComponent } from './waitingroom/waitingroom.component';
+import { CommonModule } from '@angular/common';
+import { ClipboardModule } from 'ngx-clipboard';
+
+
 
 
 @NgModule({
@@ -31,6 +35,8 @@ import { WaitingroomComponent } from './waitingroom/waitingroom.component';
     AppRoutingModule,
     BrowserAnimationsModule,
     FormsModule,
+    CommonModule,
+    ClipboardModule,
     AngularFireModule.initializeApp(environment.firebase),
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),

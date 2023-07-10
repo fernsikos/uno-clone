@@ -219,21 +219,6 @@ export class FirestoreService implements OnInit {
     setDoc(doc(this.db,'games', this.gameId, 'player', this.playerNumber.toString(), 'myCards', card.id), card)
   }
 
-  // async snapThrowedCards() {
-  //   await onSnapshot(collection(this.db, 'games', this.gameId, 'throwedCards'), async (snapshot) => {
-  //     console.log(snapshot.size, 'snapsize')
-  //     console.log(this.onlineGame.throwedCards)
-  //     snapshot.docs.forEach(async (doc) => {
-  //       const cardAlreadyExists = this.onlineGame.throwedCards.some((card) => card.id === doc.data()['id']);
-  //       if (!cardAlreadyExists) {
-  //         this.onlineGame.throwedCards.push(doc.data())
-  //       }
-  //     })
-  //   })
-  //   console.log('test', this.onlineGame.lastCard)
-  // //  this.sortCards()
-  // }
-
   async snapThrowedCards() {
     await onSnapshot(collection(this.db, 'games', this.gameId, 'throwedCards'), async (snapshot) => {
       snapshot.docs.forEach(async (doc) => {

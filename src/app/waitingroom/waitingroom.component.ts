@@ -3,6 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { initializeApp } from 'firebase/app';
 import { collection, doc, getFirestore, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { environment } from 'src/environments/environment';
+import { ClipboardService } from 'ngx-clipboard';
+
 
 
 
@@ -15,7 +17,7 @@ import { environment } from 'src/environments/environment';
   styleUrls: ['./waitingroom.component.scss']
 })
 export class WaitingroomComponent implements OnInit {
-  constructor(private router:Router, private route: ActivatedRoute) {
+  constructor(private router:Router, private route: ActivatedRoute, private clipboardService: ClipboardService) {
 
   }
   gameId: string;
@@ -33,7 +35,7 @@ export class WaitingroomComponent implements OnInit {
     })
     this.snapPlayersJoinedGame();
     this.snapGameStarted()
-
+ 
   }
 
 
@@ -83,6 +85,10 @@ export class WaitingroomComponent implements OnInit {
 
   enterGame() {
     this.router.navigateByUrl('/game/'+ this.gameId + '/' + this.playerNumer)
+  }
+
+  copyToClipboard(link: string) {
+    this.clipboardService.copyFromContent(link);
   }
 
 }

@@ -91,7 +91,6 @@ export class GameboardComponent implements OnInit {
         this.firestoreService.setForceDrawFirestore(false)
       }
     }, 1500);
-    this.firestoreService.logCards()
   }
 
   checkIfNeedExeption() {
@@ -163,7 +162,6 @@ export class GameboardComponent implements OnInit {
       this.myCards.splice(i, 1);
       this.firestoreService.setActiveColorFirestore('none')
     }, 500);
-    this.firestoreService.logCards()
   }
 
   showColorPalette(returnData, i) {

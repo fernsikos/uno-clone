@@ -54,11 +54,8 @@ export class ConfigGameComponent implements OnInit {
         } else if (change.type === 'removed') {
          this.removePlayer(change)
         }
-        console.log(change.type);
       })
-      console.log(this.joinedPlayers.length)
       this.player = this.joinedPlayers.length + 1
-      console.log('i am player number: ' + this.player)
     })
   }
 
