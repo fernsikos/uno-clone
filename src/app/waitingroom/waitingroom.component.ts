@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { initializeApp } from 'firebase/app';
-import { collection, doc, getFirestore, onSnapshot, setDoc } from 'firebase/firestore';
+import { collection, doc, getFirestore, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { environment } from 'src/environments/environment';
+
+
 
 
 
@@ -71,8 +73,9 @@ export class WaitingroomComponent implements OnInit {
 
   startGameForAllPlayers() {
     if (!this.gameStarted) {
-      setDoc(doc(this.db, 'games', this.gameId), {
-        gameStarted: true
+      updateDoc(doc(this.db, 'games', this.gameId), {
+        gameStarted: true,
+        // activePlayer: 1
       })
     }
     this.enterGame()

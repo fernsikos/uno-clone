@@ -30,7 +30,7 @@ export class Rules {
             }
             console.log('filter ForceDraw')
         }else if(this.activeColor === 'exeption') {
-            this.allowCardWithSameColorOrSpecial()
+            this.allowCardWithSameColor()
             console.log('filter exeption')
         } else if(this.activeColor && this.activeColor !== 'none') {
             this.checkIfCardHasNewColor()
@@ -51,8 +51,8 @@ export class Rules {
 
     }
 
-    allowCardWithSameColorOrSpecial() {
-        if(this.throwedCard['color'] === this.lastCard['color'] || this.throwedCard['special'] === this.lastCard['special']) {
+    allowCardWithSameColor() {
+        if(this.throwedCard['color'] === this.lastCard['color']) {
             this.returnData.pass = true;
             this.returnData.resetExeption = true;
         }

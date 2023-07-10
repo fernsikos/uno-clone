@@ -128,7 +128,7 @@ export class Game {
      * Pushes wild cards to array
      */
     pushWilds() {
-        for (let i = 0; i < 4; i++) {/// auf 4 zurück setzen
+        for (let i = 0; i < 15; i++) {/// auf 4 zurück setzen
             this.pushWild();
             this.pushWildDraw();
         }

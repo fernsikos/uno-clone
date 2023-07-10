@@ -44,7 +44,7 @@ export class GameboardComponent implements OnInit {
   async ngOnInit() {
     this.route.params.subscribe(params => {
       this.firestoreService.gameId = params['id'];
-      this.firestoreService.playerNumber = params['player']
+      this.firestoreService.playerNumber = parseInt(params['player'])
     })
     this.firestoreService.game = new Game(); //Eventuell nur player 1
     this.firestoreService.onlineGame = new OnlineGame();
@@ -55,6 +55,7 @@ export class GameboardComponent implements OnInit {
     await this.checkIfCardsLoaded(this.firestoreService);
     await this.firestoreService.loadfFirstcard();
     await this.firestoreService.snapGameChanges();
+    // await this.firestoreService.snapThrowedCards()
     this.rules = new Rules();
     this.firestoreService.pickInitialCards(this.myCards, this.firestoreService.playerNumber);
   }
@@ -81,7 +82,6 @@ export class GameboardComponent implements OnInit {
         const cardToDelete = this.firestoreService.onlineGame.stack[i]
         this.myCards.push(cardToDelete);
         this.firestoreService.pushPickedCardToMyCardsFirestore(cardToDelete);
-        // this.firestoreService.onlineGame.stack.pop();
         this.firestoreService.deleteCardFromStack(cardToDelete['id'])
       }
       if(this.firestoreService.drawCount > 1) {
@@ -91,12 +91,21 @@ export class GameboardComponent implements OnInit {
         this.firestoreService.setForceDrawFirestore(false)
       }
     }, 1500);
-    
+    this.firestoreService.logCards()
   }
 
   checkIfNeedExeption() {
     if(this.firestoreService.activeColor === 'none') {
       this.firestoreService.setActiveColorFirestore('exeption')
+    }
+  }
+
+  checkIfMyTurn(i) {
+    console.log('myTurncheck')
+    console.log(this.firestoreService.activePlayer)
+    console.log(this.firestoreService.playerNumber)
+    if(this.firestoreService.activePlayer === this.firestoreService.playerNumber) {
+      this.checkIfCardThrowable(i)
     }
   }
 
@@ -148,11 +157,13 @@ export class GameboardComponent implements OnInit {
     this.myCards[i].throw = true
     setTimeout(() => {
       this.firestoreService.onlineGame.throwedCards.push(this.myCards[i]);
+      this.myCards[i].throwNumber = this.firestoreService.onlineGame.throwedCards.length;
       this.firestoreService.pushCardToThrowedCardsFirestore(this.myCards[i]);
       this.firestoreService.deleteCardFromMyCardsFirestore(this.myCards[i].id);
       this.myCards.splice(i, 1);
       this.firestoreService.setActiveColorFirestore('none')
     }, 500);
+    this.firestoreService.logCards()
   }
 
   showColorPalette(returnData, i) {
