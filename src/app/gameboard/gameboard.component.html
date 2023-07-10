@@ -6,9 +6,15 @@
             <div *ngIf="firestoreService.activeColor === 'blue'" class="color-box" [ngStyle]="{'background-color': '#5555FD'}"></div>
             <div *ngIf="firestoreService.activeColor === 'red'" class="color-box" [ngStyle]="{'background-color': '#FF5655'}"></div>
         </div>
+        <div class="top-middle-layer">
+            <div *ngIf="!firestoreService.timebar" class="next-turn-box">Next turn: {{ firestoreService?.activePlayerName}}</div>
+            <div *ngIf="firestoreService.timebar" class="next-turn-box">Can you throw?</div>
+        </div>
         <div class="right-top-layer">
             <div *ngIf="firestoreService.drawCount > 1" class="draw-window">Draw {{ firestoreService.drawCount}}</div>
         </div>
+    </div>
+    <div *ngIf="firestoreService.timebar" class="time-bar">
     </div>
     <div class="middle-layer">
         <div class="player-two-container"></div>
@@ -26,7 +32,7 @@
     </div>
     <div class="bottom-layer">
         <div class="my-cards" [ngStyle]="{'width.px': 90 + (41 * myCards?.length)}">
-            <img *ngFor="let card of myCards; let i = index" src="assets/Cards/{{ card?.card }}" alt="" [ngStyle]="{'left.px': i * 38 + 10}" id="myCard{{ i }}" [class.throwCard]="card.throw" (click)="checkIfCardThrowable(i)">
+            <img *ngFor="let card of myCards; let i = index" src="assets/Cards/{{ card?.card }}" alt="" [ngStyle]="{'left.px': i * 38 + 10}" id="myCard{{ i }}" [class.throwCard]="card.throw" (click)="checkIfMyTurn(i)">
         </div>
     </div>
     <div *ngIf="firestoreService.colorWheelAnimation" class="color-wheel-container" [@fade]="firestoreService.colorWheelAnimation ? 'active' : 'void'">

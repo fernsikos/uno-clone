@@ -5,21 +5,8 @@ export class OnlineGame {
     public stack: any[] = [];
     public throwedCards: any = [];
     public firstCard: object;
+    public totalPlayer: number;
+    public players: object[] = [];
 
 
-    
-
-    // updateCurrentColor() {
-    //     if (this.lastCard) {
-    //         this.currentColor = this.lastCard['color'];
-    //     } else {
-    //         setTimeout(() => {
-    //             this.currentColor = this.lastCard['color'];
-    //             console.log('timeout used')
-    //         }, 1000);
-    //     }
-    // }
-
-
-    
 }

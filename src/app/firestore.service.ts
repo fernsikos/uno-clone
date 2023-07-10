@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { initializeApp } from 'firebase/app';
 import { update } from 'firebase/database';
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
+import { QuerySnapshot, addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { environment } from 'src/environments/environment';
 import { Game } from './models/game';
 import { OnlineGame } from './models/online-game';
@@ -21,9 +21,11 @@ export class FirestoreService implements OnInit {
   gameId: string;
   onlineGame: OnlineGame;
   playerNumber:any;
-  activePlayer: number;
+  public activePlayer: number;
+  activePlayerName: string;
   activeColor: string;
   drawCount: number = 1;
+  public timebar: boolean = false;
   public forceDraw: boolean;
   public colorWheelAnimation: boolean = false;
   public colorWheel: boolean = false;
@@ -39,6 +41,15 @@ export class FirestoreService implements OnInit {
     await this.pushFirstCardToFirestore();
     await this.pushStackToFirestore();
 
+  }
+
+  async loadPlayers() {
+    const querySnapshot = await getDocs(collection(this.db, 'games', this.gameId, 'player'))
+    
+    querySnapshot.forEach((doc) => {
+      this.onlineGame.players.push(doc.data())
+    })
+    console.log(this.onlineGame.players)
   }
 
   async pushStackToFirestore() {
@@ -161,6 +172,8 @@ export class FirestoreService implements OnInit {
           this.colorWheelAnimation = snapshot.data()['colorWheelAnimation']
         } 
       }
+      this.onlineGame.totalPlayer = snapshot.data()['totalPlayer']?snapshot.data()['totalPlayer']:this.onlineGame.totalPlayer;
+      this.onlineGame.gameDirection = snapshot.data()['gameDirection']?snapshot.data()['gameDirection']:this.onlineGame.gameDirection;
       if(!snapshot.data()['colorWheelAnimation']) {
         this.colorWheelAnimation = false
       }
@@ -173,6 +186,7 @@ export class FirestoreService implements OnInit {
       } 
       if(snapshot.data()['activePlayer']) {
         this.activePlayer = snapshot.data()['activePlayer']
+        this.activePlayerName = this.onlineGame.players[this.activePlayer - 1]['name']
       }
       if(snapshot.data()['forceDraw']) {
         this.forceDraw = snapshot.data()['forceDraw']
@@ -201,6 +215,14 @@ export class FirestoreService implements OnInit {
 
   updateDrawCountFirestore(count) {
     updateDoc(doc(this.db, 'games', this.gameId), {drawCount: count})
+  }
+
+  updateActivePlayerFirestore(playerNumber) {
+    updateDoc(doc(this.db,'games', this.gameId), { activePlayer: playerNumber})
+  }
+
+  updateGameDirectionFirestore(direction) {
+  updateDoc(doc(this.db, 'games', this.gameId), {gameDirection: direction})
   }
 
   async handOutCards() {

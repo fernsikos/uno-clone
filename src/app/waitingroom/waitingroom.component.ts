@@ -77,7 +77,8 @@ export class WaitingroomComponent implements OnInit {
     if (!this.gameStarted) {
       updateDoc(doc(this.db, 'games', this.gameId), {
         gameStarted: true,
-        // activePlayer: 1
+        activePlayer: 1,
+        totalPlayer: this.joinedPlayers.length
       })
     }
     this.enterGame()

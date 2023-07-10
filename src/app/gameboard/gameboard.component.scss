@@ -20,6 +20,33 @@
         width: 105px;
     }
 
+    .time-bar {
+        position: absolute;
+        animation: timeBar 5s linear forwards;
+        height: 25px;
+        background-color: black;
+        top: 70px;
+        color: white;
+        display: flex;
+        align-items: center;
+        font-size: larger;
+        overflow: hidden;
+        width: 0;
+        left: 0;
+        
+    }
+
+    @keyframes timeBar {
+        from {
+            width: 100%;
+        }
+
+        to {
+            width: 0;
+        }
+
+    }
+
     .top-layer {
         width: 100vw;
         height: 70px;
@@ -49,6 +76,30 @@
             justify-content: center;
             font-size: 24px;
         }
+
+        .top-middle-layer {
+
+            position: absolute;
+            margin-left: auto;
+            margin-right: auto;
+            left: 0;
+            right: 0;
+            width: fit-content;
+
+            .next-turn-box {
+                height: 50px;
+                background-color: rgb(0, 0, 0);
+                border-radius: 10px;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                padding: 0 15px;
+
+            }
+        }
+
     }
 
     .middle-layer {
@@ -202,7 +253,8 @@
             color: white;
             text-align: center;
 
-            .wheel-container, .animated-wheel-container{
+            .wheel-container,
+            .animated-wheel-container {
                 display: flex;
                 flex-direction: column;
 
@@ -226,7 +278,7 @@
                 }
             }
 
-            .animated-wheel-container{
+            .animated-wheel-container {
                 animation: turntable 5s linear infinite;
 
                 .color {
@@ -244,6 +296,7 @@
         from {
             transform: rotate(0deg);
         }
+
         to {
             transform: rotate(360deg);
         }

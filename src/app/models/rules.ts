@@ -4,14 +4,16 @@ export class Rules {
     throwedCard: object;
     activeColor: any;
     forceDraw: boolean;
+    activePlayer: number;
     public returnData: any;
        
 
-    compareCards(throwedCard: object, lastCard: object, activeColor:any, forceDraw: boolean) {
+    compareCards(throwedCard: object, lastCard: object, activeColor:any, forceDraw: boolean, activePlayer: number) {
         this.lastCard = lastCard;
         this.throwedCard = throwedCard;
         this.activeColor = activeColor;
         this.forceDraw = forceDraw;
+        this.activePlayer = activePlayer;
         this.returnData = {
             pass: false,
             activateColorWheel: false
@@ -55,23 +57,38 @@ export class Rules {
         if(this.throwedCard['color'] === this.lastCard['color']) {
             this.returnData.pass = true;
             this.returnData.resetExeption = true;
+        } else this.allowWilds()
+    }
+
+    allowWilds() {
+        if (this.throwedCard['special'] === 'wild') {
+            this.returnData.pass = true;
+            this.returnData.resetExeption = true;
+            this.returnData.activateColorWheel = true;
         }
     }
 
     checkIfCardHasNewColor() {
-        if(this.throwedCard['color'] === this.activeColor) {
+        if (this.throwedCard['color'] === this.activeColor && this.throwedCard['special'] === 'skip') {
             this.returnData.pass = true;
-        }
-        if(this.throwedCard['special'] === 'wild') {
+            this.returnData.skip = true;
+        } else if(this.throwedCard['color'] === this.activeColor) {
+            this.returnData.pass = true;
+        } else if(this.throwedCard['special'] === 'wild') {
             this.returnData.pass = true,
             this.returnData.activateColorWheel = true;
-
+        } else if (this.throwedCard['special'] === '+4') {
+            this.returnData.draw = 4;
+            this.returnData.pass = true;
+            this.returnData.activateColorWheel = true;
+            this.returnData.forceDraw = true;
         }
     }
 
     checkForSameSpecial() {
         if (this.throwedCard['special'] === 'skip' && this.throwedCard['color'] !== this.lastCard['color']) {
             this.returnData.pass = true
+            this.returnData.skip = true
         } else if(this.lastCard['special'] === '+2' && this.throwedCard['special'] == '+2') {
             this.returnData.pass = true;
             this.returnData.draw = 2
@@ -83,12 +100,18 @@ export class Rules {
             this.returnData.pass = true;
             this.returnData.draw = 2;
             console.log('first')
+        } else if (this.throwedCard['special'] === 'skip') {
+            this.returnData.pass = true;
+            this.returnData.skip = true;
         } else if(!this.lastCard['special'] || this.lastCard['special'] === 'reverse') {
             this.returnData.pass = true
+            this.returnData.reverse = true
             console.log('second')
         } else if (this.lastCard['special'] === 'skip' && this.throwedCard['special'] === 'pass') {
             this.returnData.pass = true
             console.log('third')
+        } else if(this.lastCard['special'] === 'skip' && this.activeColor === 'exeption') {
+            this.returnData.pass = true
         }
     }
 
