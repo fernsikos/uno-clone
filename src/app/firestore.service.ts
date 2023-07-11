@@ -68,6 +68,13 @@ export class FirestoreService implements OnInit {
     }
   }
 
+  async pushShuffeledThrowedCardsToStack(shuffledCards) {
+    const collectionRef = collection(this.db, 'games', this.gameId, 'stack');
+    shuffledCards.forEach(async card => {
+      await addDoc(collectionRef, card);
+    });
+  }
+
   async pushMyCardsToFirestore(playerMe, myCards) {
     const collectionRef = collection(this.db, 'games', this.gameId, 'player', playerMe, 'myCards')
 

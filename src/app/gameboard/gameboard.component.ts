@@ -42,16 +42,16 @@ export class GameboardComponent implements OnInit {
 
   // playerNumber: number;
   rules: Rules;
-  
+
   app = initializeApp(environment.firebase)
   db: any = getFirestore(this.app)
   myCards: any[] = [];
   public pickCardAnimation: boolean = false;
   public cardInThrow: string;
   public fadeOut: boolean = false;
- 
 
-  constructor(private route:ActivatedRoute, public firestoreService: FirestoreService) {
+
+  constructor(private route: ActivatedRoute, public firestoreService: FirestoreService) {
   }
 
   async ngOnInit() {
@@ -63,7 +63,7 @@ export class GameboardComponent implements OnInit {
     this.firestoreService.onlineGame = new OnlineGame();
     if (this.firestoreService.playerNumber == 1) {
       await this.firestoreService.pushGameToFirestore();
-    } 
+    }
     await this.firestoreService.loadPlayers();
     await this.firestoreService.loadStackFromFirestore();
     await this.checkIfCardsLoaded(this.firestoreService);
@@ -76,41 +76,66 @@ export class GameboardComponent implements OnInit {
     this.firestoreService.pickInitialCards(this.myCards, this.firestoreService.playerNumber);
   }
 
- checkIfCardsLoaded(service) {
-  return new Promise<void>((resolve) => {
-    function check() {
-      if (service.onlineGame.stack.length > 1) {
-        resolve()
-      } else {
-        setTimeout(check, 500)
+  checkIfCardsLoaded(service) {
+    return new Promise<void>((resolve) => {
+      function check() {
+        if (service.onlineGame.stack.length > 1) {
+          resolve()
+        } else {
+          setTimeout(check, 500)
+        }
       }
-    }
-    check()
-  })
- }
+      check()
+    })
+  }
 
 
   pickCard(exeption) {
-    if (this.firestoreService.activePlayer === this.firestoreService.playerNumber || exeption) {
+    if (this.firestoreService.activePlayer === this.firestoreService.playerNumber && !this.firestoreService.timebar && !this.pickCardAnimation || exeption) {
       this.pickCardAnimation = true;
       setTimeout(() => {
         this.pickCardAnimation = false;
-        for (let i = 0; i < this.firestoreService.drawCount; i++) {
-          const cardToDelete = this.firestoreService.onlineGame.stack[i]
-          this.myCards.push(cardToDelete);
-          this.firestoreService.pushPickedCardToMyCardsFirestore(cardToDelete);
-          this.firestoreService.deleteCardFromStack(cardToDelete['id'])
-        }
-        if(this.firestoreService.drawCount > 1) {
-          this.firestoreService.drawCount = 1;
-          this.firestoreService.updateDrawCountFirestore(this.firestoreService.drawCount)
-          this.checkIfNeedExeption();
-          this.firestoreService.setForceDrawFirestore(false);
-          this.setNextPlayer(0)
-        } else this.activateTimeBar()
-
+        this.handlePickCards(exeption)
       }, 1500);
+      this.checkIfUnoNeedToBeReset()
     } else console.log('not my Turn')
+  }
+
+  handlePickCards(exeption) {
+    const notEnoughCards = this.checkIfStackHasEnoughCards();
+    if (notEnoughCards) {
+      console.log('not enough Cards')
+      let shuffeledThrowedCards = this.rules.shuffle(this.firestoreService.onlineGame.throwedCards.pop());
+      console.log(shuffeledThrowedCards)
+      // this.firestoreService.pushShuffeledThrowedCardsToStack(shuffeledThrowedCards)
+      // this.firestoreService.onlineGame.throwedCards= this.firestoreService.onlineGame.throwedCards[this.firestoreService.onlineGame.throwedCards.length]
+    }
+
+    for (let i = 0; i < this.firestoreService.drawCount; i++) {
+      const cardToDelete = this.firestoreService.onlineGame.stack[i]
+      this.myCards.push(cardToDelete);
+      this.firestoreService.pushPickedCardToMyCardsFirestore(cardToDelete);
+      this.firestoreService.deleteCardFromStack(cardToDelete['id'])
+    }
+    if (this.firestoreService.drawCount > 1) {
+      this.handleDrawCountReset()
+    } else if (!exeption) {
+      this.activateTimeBar()
+    }
+  }
+
+  handleDrawCountReset() {
+    this.firestoreService.drawCount = 1;
+    this.firestoreService.updateDrawCountFirestore(this.firestoreService.drawCount)
+    this.checkIfNeedExeption();
+    this.firestoreService.setForceDrawFirestore(false);
+    this.setNextPlayer(0)
+  }
+
+  checkIfStackHasEnoughCards() {
+    if(this.firestoreService.drawCount > this.firestoreService.onlineGame.stack.length) {
+      return true
+    } else return false
   }
 
   activateTimeBar() {
@@ -120,24 +145,24 @@ export class GameboardComponent implements OnInit {
         this.firestoreService.timebar = false
         this.setNextPlayer(0)
       }
-    }, 5000);
+    }, 3000);
 
   }
 
   checkIfMyTurn(i) {
-    if(this.firestoreService.activePlayer === this.firestoreService.playerNumber) {
+    if (this.firestoreService.activePlayer === this.firestoreService.playerNumber) {
       this.checkIfCardThrowable(i)
     } else console.log('not my turn')
   }
 
   checkIfCardThrowable(i) {
     let returnData = this.rules.compareCards(this.myCards[i], this.firestoreService.onlineGame.lastCard, this.firestoreService.activeColor, this.firestoreService.forceDraw, this.firestoreService.activePlayer)
-    if(returnData['pass']) {
+    if (returnData['pass']) {
       this.updateDrawcount(returnData)
       this.updateGameDirection(returnData)
       this.firestoreService.updateLastCard(this.myCards[i])
       this.checkWhoIsNextPlayer(returnData);
-      if(!returnData['activateColorWheel']) {
+      if (!returnData['activateColorWheel']) {
         this.throwCard(i);
         this.checkIfExeptionNeedToReset(returnData)
       } else {
@@ -149,8 +174,8 @@ export class GameboardComponent implements OnInit {
   }
 
   updateGameDirection(returnData) {
-    if(returnData.reverse) {
-      if(this.firestoreService.onlineGame.gameDirection === 'clockwise') {
+    if (returnData.reverse) {
+      if (this.firestoreService.onlineGame.gameDirection === 'clockwise') {
         this.firestoreService.updateGameDirectionFirestore('anticlockwise')
       } else this.firestoreService.updateGameDirectionFirestore('clockwise')
     }
@@ -158,7 +183,7 @@ export class GameboardComponent implements OnInit {
 
   checkWhoIsNextPlayer(returnData) {
     let skipCount: number = 0;
-    if(returnData.skip) {
+    if (returnData.skip) {
       skipCount = 1;
       this.checkIfNeedExeption();
     };
@@ -167,36 +192,37 @@ export class GameboardComponent implements OnInit {
 
   setNextPlayer(skipCount) {
     let nextPlayer: number;
-    if(this.firestoreService.onlineGame.gameDirection = 'clockwise') {
+    if (this.firestoreService.onlineGame.gameDirection = 'clockwise') {
       nextPlayer = (this.firestoreService.activePlayer + 1 + skipCount) % this.firestoreService.onlineGame.totalPlayer || this.firestoreService.onlineGame.totalPlayer
-    } else {nextPlayer = (this.firestoreService.activePlayer - 1 - skipCount) % this.firestoreService.onlineGame.totalPlayer || this.firestoreService.onlineGame.totalPlayer
+    } else {
+      nextPlayer = (this.firestoreService.activePlayer - 1 - skipCount) % this.firestoreService.onlineGame.totalPlayer || this.firestoreService.onlineGame.totalPlayer
     }
     this.firestoreService.updateActivePlayerFirestore(nextPlayer)
   }
 
   checkIfForceDrawIsSet(returnData) {
-    if(returnData['forceDraw']) {
+    if (returnData['forceDraw']) {
       this.firestoreService.setForceDrawFirestore(true)
     }
   }
 
   checkIfNeedExeption() {
-    if(this.firestoreService.activeColor === 'none' ) {
+    if (this.firestoreService.activeColor === 'none') {
       this.firestoreService.setActiveColorFirestore('exeption')
     }
   }
 
   checkIfExeptionNeedToReset(returnData) {
-    if(returnData['resetExeption']) {
+    if (returnData['resetExeption']) {
       this.firestoreService.setActiveColorFirestore('none')
 
     }
   }
 
   updateDrawcount(returnData) {
-    if(returnData.draw) {
+    if (returnData.draw) {
       let newDrawCount: number;
-      if(this.firestoreService.drawCount === 1) {
+      if (this.firestoreService.drawCount === 1) {
         newDrawCount = returnData.draw
       } else {
         newDrawCount = this.firestoreService.drawCount + returnData.draw;
@@ -214,23 +240,36 @@ export class GameboardComponent implements OnInit {
       this.firestoreService.pushCardToThrowedCardsFirestore(this.myCards[i]);
       this.firestoreService.deleteCardFromMyCardsFirestore(this.myCards[i].id);
       this.removeCardFromMyCard(i);
-      if(this.firestoreService.onlineGame.lastCard['special'] !== 'skip') {
+      if (this.firestoreService.onlineGame.lastCard['special'] !== 'skip') {
         this.firestoreService.setActiveColorFirestore('none')
       }
     }, 500);
   }
 
   removeCardFromMyCard(i) {
-    this.myCards.splice(i,1);
-    if(this.myCards.length < 2) {
-      this.firestoreService.addLatecallFirestore();
-      setTimeout(() => {
-        this.pickCard(true)
-      }, 2000);
-      setTimeout(() => {
-        this.firestoreService.deleteLatecallFirestore()
-      }, 5000);
+    this.myCards.splice(i, 1);
+    if (this.myCards.length < 2) {
+      this.checkIfCallUnoLate()
     }
+  }
+
+  checkIfCallUnoLate() {
+    setTimeout(() => {
+      const calledUno = this.firestoreService.onlineGame.unoCalls.find((player) => player['name'] === this.firestoreService.myName)
+      if (!calledUno) {
+        this.calledUnoLate()
+      }
+    }, 5000);
+  }
+
+  calledUnoLate() {
+    this.firestoreService.addLatecallFirestore();
+    setTimeout(() => {
+      this.pickCard(true)
+    }, 2000);
+    setTimeout(() => {
+      this.firestoreService.deleteLatecallFirestore()
+    }, 5000);
   }
 
   showColorPalette(returnData, i) {
@@ -248,28 +287,30 @@ export class GameboardComponent implements OnInit {
   callUno() {
     let validCall = true;
     let alreadyCalledUno = this.firestoreService.onlineGame.unoCalls.some((player) => player['name'] == this.firestoreService.myName)
-    if(!alreadyCalledUno) {
+    if (!alreadyCalledUno) {
       this.firestoreService.updateCallOutUnoOnFirestore(validCall)
-      console.log('calledUno')
-      // this.checkIfUnoCallWasValid()
+      this.checkIfUnoCallWasToEarly()
     }
   }
 
-  checkIfUnoCallWasValid() {
-    if(this.myCards.length>1) {
+  checkIfUnoNeedToBeReset() {
+    const activeUnoCallOut = this.firestoreService.onlineGame.unoCalls.find((person) => person['name'] === this.firestoreService.myName)
+    if (activeUnoCallOut) {
+      this.firestoreService.deleteUnoCallOutFirestore(this.firestoreService.myName)
+    }
+  }
+
+  checkIfUnoCallWasToEarly() {
+    if (this.myCards.length > 1) {
       setTimeout(() => {
         this.firestoreService.updateCallOutUnoOnFirestore(false)
+        this.pickCard(true)
       }, 2000);
       setTimeout(() => {
         this.firestoreService.deleteUnoCallOutFirestore(this.firestoreService.myName)
       }, 5000);
     }
   }
-
-  
-
 }
-// function getCollections(playerRef: DocumentReference<DocumentData>) {
-//   throw new Error('Function not implemented.');
-// }
+
 

@@ -29,6 +29,8 @@ export class Rules {
         if(this.forceDraw) {
             if(this.throwedCard['special'] === '+4') {
                 this.returnData.pass = true
+                this.returnData.draw = 4
+                this.returnData.activateColorWheel = true;
             }
             console.log('filter ForceDraw')
         }else if(this.activeColor === 'exeption') {
@@ -65,6 +67,18 @@ export class Rules {
             this.returnData.pass = true;
             this.returnData.resetExeption = true;
             this.returnData.activateColorWheel = true;
+        } else if(this.throwedCard['spechial'] === this.lastCard['spechial']) {
+            this.allowSpecial()
+        }
+    }
+
+    allowSpecial() {
+        if(this.throwedCard['special'] === 'skip' && this.lastCard['special'] === 'skip') {
+            this.returnData.pass = true;
+            this.returnData.skip = true
+        } else if(this.throwedCard['special'] === '+2' && this.lastCard['special'] === '+2') {
+            this.returnData.pass = true;
+            this.returnData.draw = 2
         }
     }
 
@@ -92,7 +106,10 @@ export class Rules {
         } else if(this.lastCard['special'] === '+2' && this.throwedCard['special'] == '+2') {
             this.returnData.pass = true;
             this.returnData.draw = 2
-        } 
+        } else if(this.throwedCard['special'] === 'skip' && this.lastCard['special'] === 'skip') {
+            this.returnData.pass = true;
+            this.returnData.skip = true
+        }
     }
 
     checkForSameColor() {
@@ -135,5 +152,16 @@ export class Rules {
             this.returnData.pass = true;
             this.returnData.activateColorWheel = true;
         }
+    }
+
+    shuffle(array) {
+        let currentIndex = array.length, randomIndex: number;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
+        }
+        return array;
     }
 }

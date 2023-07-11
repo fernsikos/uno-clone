@@ -10,9 +10,9 @@ export class Game {
        
         for (let i = 0; i < this.types.length; i++) {
             const element = this.types[i];
-            this.pushZeroToNine(element);
+            // this.pushZeroToNine(element);
             this.pushOneToNine(element);
-            this.pushSpecials(element);
+            // this.pushSpecials(element);
         }
         this.pushWilds();
         this.shuffle(this.stack);
@@ -128,8 +128,8 @@ export class Game {
      * Pushes wild cards to array
      */
     pushWilds() {
-        for (let i = 0; i < 15; i++) {/// auf 4 zurück setzen
-            this.pushWild();
+        for (let i = 0; i < 10; i++) {/// auf 4 zurück setzen
+            // this.pushWild();
             this.pushWildDraw();
         }
     }
