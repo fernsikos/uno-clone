@@ -7,6 +7,8 @@ export class OnlineGame {
     public firstCard: object;
     public totalPlayer: number;
     public players: object[] = [];
+    public unoCalls:object[] = [];
+    public lateCalls: object[] = [];
 
 
 }

@@ -12,6 +12,7 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
 
 
 
+
 @Component({
   selector: 'app-gameboard',
   templateUrl: './gameboard.component.html',
@@ -21,6 +22,18 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
       state('active', style({ opacity: 1 })),
       transition('void => active', animate('300ms ease-in')),
       transition('active => void', animate('300ms ease-out'))
+    ]),
+    trigger('slide-UNO-Calls', [
+      state('void', style({ left: -150 })),
+      state('active', style({ left: 0 })),
+      transition('void => active', animate('800ms ease-in-out')),
+      transition('active => void', animate('800ms ease-in-out'))
+    ]),
+    trigger('slide-margin-left', [
+      state('void', style({ marginLeft: 0 })),
+      state('active', style({ marginLeft: 148 })),
+      transition('void => active', animate('800ms ease-in-out')),
+      transition('active => void', animate('800ms ease-in-out'))
     ])
   ],
   styleUrls: ['./gameboard.component.scss']
@@ -56,6 +69,8 @@ export class GameboardComponent implements OnInit {
     await this.checkIfCardsLoaded(this.firestoreService);
     await this.firestoreService.loadfFirstcard();
     await this.firestoreService.snapGameChanges();
+    await this.firestoreService.snapUnoCalls();
+    await this.firestoreService.snapLateCalls()
     // await this.firestoreService.snapThrowedCards()
     this.rules = new Rules();
     this.firestoreService.pickInitialCards(this.myCards, this.firestoreService.playerNumber);
@@ -75,8 +90,8 @@ export class GameboardComponent implements OnInit {
  }
 
 
-  pickCard() {
-    if (this.firestoreService.activePlayer === this.firestoreService.playerNumber) {
+  pickCard(exeption) {
+    if (this.firestoreService.activePlayer === this.firestoreService.playerNumber || exeption) {
       this.pickCardAnimation = true;
       setTimeout(() => {
         this.pickCardAnimation = false;
@@ -198,18 +213,30 @@ export class GameboardComponent implements OnInit {
       this.myCards[i].throwNumber = this.firestoreService.onlineGame.throwedCards.length;
       this.firestoreService.pushCardToThrowedCardsFirestore(this.myCards[i]);
       this.firestoreService.deleteCardFromMyCardsFirestore(this.myCards[i].id);
-      this.myCards.splice(i, 1);
+      this.removeCardFromMyCard(i);
       if(this.firestoreService.onlineGame.lastCard['special'] !== 'skip') {
         this.firestoreService.setActiveColorFirestore('none')
       }
     }, 500);
   }
 
+  removeCardFromMyCard(i) {
+    this.myCards.splice(i,1);
+    if(this.myCards.length < 2) {
+      this.firestoreService.addLatecallFirestore();
+      setTimeout(() => {
+        this.pickCard(true)
+      }, 2000);
+      setTimeout(() => {
+        this.firestoreService.deleteLatecallFirestore()
+      }, 5000);
+    }
+  }
+
   showColorPalette(returnData, i) {
     this.firestoreService.colorWheel = true;
     this.throwCard(i);
     this.firestoreService.updateLastCard(this.myCards[i])
-    // this.updateGameVariables(returnData)
   }
 
   chooseColor(color) {
@@ -217,6 +244,29 @@ export class GameboardComponent implements OnInit {
     this.firestoreService.colorWheel = false;
     this.firestoreService.stopColorWheelAnimation()
   }
+
+  callUno() {
+    let validCall = true;
+    let alreadyCalledUno = this.firestoreService.onlineGame.unoCalls.some((player) => player['name'] == this.firestoreService.myName)
+    if(!alreadyCalledUno) {
+      this.firestoreService.updateCallOutUnoOnFirestore(validCall)
+      console.log('calledUno')
+      // this.checkIfUnoCallWasValid()
+    }
+  }
+
+  checkIfUnoCallWasValid() {
+    if(this.myCards.length>1) {
+      setTimeout(() => {
+        this.firestoreService.updateCallOutUnoOnFirestore(false)
+      }, 2000);
+      setTimeout(() => {
+        this.firestoreService.deleteUnoCallOutFirestore(this.firestoreService.myName)
+      }, 5000);
+    }
+  }
+
+  
 
 }
 // function getCollections(playerRef: DocumentReference<DocumentData>) {

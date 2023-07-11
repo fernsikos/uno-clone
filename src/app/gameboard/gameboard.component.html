@@ -14,6 +14,17 @@
             <div *ngIf="firestoreService.drawCount > 1" class="draw-window">Draw {{ firestoreService.drawCount}}</div>
         </div>
     </div>
+    <div class="uno-calls-container">
+        <div class="uno-calls" *ngIf="firestoreService.onlineGame.unoCalls.length > 0" [@slide-margin-left]="firestoreService.onlineGame.unoCalls.length > 0? 'active' : 'void'">
+            <h2>UNO calls:</h2>
+            <div *ngFor="let player of firestoreService.onlineGame.unoCalls" class="name" [class.false-call]="!player['validCall']">{{ player['name'] }}</div>
+        </div>
+        <div class="late-calls" *ngIf="firestoreService.onlineGame.lateCalls.length > 0" [@slide-margin-left]="firestoreService.onlineGame.lateCalls.length > 0? 'active' : 'void'">
+            <h2>Late call:</h2>
+            <div *ngFor="let player of firestoreService.onlineGame.lateCalls" class="name">{{ player['name'] }}</div>
+
+        </div>
+    </div>
     <div *ngIf="firestoreService.timebar" class="time-bar">
     </div>
     <div class="middle-layer">
@@ -24,7 +35,7 @@
                 <img *ngFor="let card of firestoreService.onlineGame?.throwedCards; let i = index" [src]="'assets/Cards/' + card.card" alt="" [style.transform]="'rotate(' + card.offset + 'deg)'">
             </div>
             <div class="stack-container">
-                <img src="assets/d9gnihf-ec16caeb-ec9c-4870-9480-57c7711d844f.png" alt="" (click)="pickCard()">
+                <img src="assets/d9gnihf-ec16caeb-ec9c-4870-9480-57c7711d844f.png" alt="" (click)="pickCard(false)">
                 <img *ngIf="pickCardAnimation" src="assets/d9gnihf-ec16caeb-ec9c-4870-9480-57c7711d844f.png" alt="" class="animated-card">
             </div>
         </div>
@@ -65,4 +76,5 @@
             </div>
         </div>
     </div>
+    <div class="uno-btn" (click)="callUno()">Call UNO</div>
 </div>

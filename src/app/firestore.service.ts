@@ -21,6 +21,7 @@ export class FirestoreService implements OnInit {
   gameId: string;
   onlineGame: OnlineGame;
   playerNumber:any;
+  myName: string;
   public activePlayer: number;
   activePlayerName: string;
   activeColor: string;
@@ -29,6 +30,7 @@ export class FirestoreService implements OnInit {
   public forceDraw: boolean;
   public colorWheelAnimation: boolean = false;
   public colorWheel: boolean = false;
+  public call: boolean = true
 
 
   constructor() {
@@ -45,11 +47,10 @@ export class FirestoreService implements OnInit {
 
   async loadPlayers() {
     const querySnapshot = await getDocs(collection(this.db, 'games', this.gameId, 'player'))
-    
     querySnapshot.forEach((doc) => {
       this.onlineGame.players.push(doc.data())
     })
-    console.log(this.onlineGame.players)
+    this.myName = this.onlineGame.players[this.onlineGame.players.findIndex((player) => player['number'] === this.playerNumber)]['name']
   }
 
   async pushStackToFirestore() {
@@ -225,6 +226,27 @@ export class FirestoreService implements OnInit {
   updateDoc(doc(this.db, 'games', this.gameId), {gameDirection: direction})
   }
 
+  updateCallOutUnoOnFirestore(validation) {
+    setDoc(doc(this.db, 'games', this.gameId, 'unoCalls', this.myName),{
+      name: this.myName,
+      validCall: validation
+    })
+  }
+
+  deleteUnoCallOutFirestore(id) {
+    deleteDoc(doc(this.db, 'games', this.gameId, 'unoCalls', id))
+  }
+
+  addLatecallFirestore() {
+    setDoc(doc(this.db, 'games', this.gameId, 'lateCalls', this.myName), {
+      name: this.myName
+    })
+  }
+
+  deleteLatecallFirestore() {
+    deleteDoc(doc(this.db, 'games', this.gameId, 'lateCalls', this.myName))
+  }
+
   async handOutCards() {
     let players = await getDocs(collection(this.db, 'games', this.gameId, 'player'));
   }
@@ -260,11 +282,39 @@ export class FirestoreService implements OnInit {
         return 0;
       });
     });
-    
   }
 
-  logCards() {
-    console.log('lastCard', this.onlineGame.lastCard)
-    console.log(this.onlineGame.throwedCards)
+  async snapUnoCalls() {
+    await onSnapshot(collection(this.db, 'games', this.gameId, 'unoCalls'), async (snapshot) => {
+      snapshot.docChanges().forEach(async (change) => {
+        if(change.type == 'added') {
+          this.onlineGame.unoCalls.push(change.doc.data())
+          console.log('incoming Uno Call')
+        } else if (change.type == 'removed') {
+          const indexOfItemToRemove = this.onlineGame.unoCalls.findIndex((player) => player['name'] === change.doc.data()['name'])
+          this.onlineGame.unoCalls.splice(indexOfItemToRemove,1)
+          console.log('removing Uno Call')
+        } else if(change.type == 'modified') {
+          const indexOfItemToChange = this.onlineGame.unoCalls.findIndex((player) => player['name'] === change.doc.data()['name'])
+          this.onlineGame.unoCalls[indexOfItemToChange]['validCall'] = change.doc?.data()['validCall']
+          console.log('modifiyng Uno Call')
+        }
+      })
+    })
+  }
+
+  async snapLateCalls() {
+    onSnapshot(collection(this.db, 'games', this.gameId, 'lateCalls'), async (snapshot) => {
+      snapshot.docChanges().forEach(async (change) => {
+        if(change.type === 'added') {
+          this.onlineGame.lateCalls.push(change.doc.data())
+          console.log('incoming late call')
+        } else if(change.type === 'removed') {
+          const indexOfPlayerToRemove = this.onlineGame.lateCalls.findIndex((player) => player['name'] === change.doc.data()['name'])
+          this.onlineGame.lateCalls.splice(indexOfPlayerToRemove,1)
+          console.log('removing latecall')
+        }
+      })
+    })
   }
 }

@@ -20,10 +20,103 @@
         width: 105px;
     }
 
+    .uno-calls-container {
+        position: absolute;
+        left: -148px;
+        top: 70px;
+        display: flex;
+        flex-direction: column;
+        // background-color: aliceblue;
+        width: 296px;
+
+        .uno-calls,
+        .late-calls {
+            background-color: rgba(39, 39, 39, 0.456);
+            padding-left: 24px;
+            padding-right: 24px;
+            padding-top: 24px;
+            padding-bottom: 24px;
+            transition: height 200ms ease-in-out;
+            display: flex;
+            flex-direction: column;
+            
+            max-width: 100px;
+
+        }
+
+        .name {
+            font-weight: bold;
+            width: 100px;
+            height: 25px;
+            background-color: black;
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            overflow: hidden;
+
+
+            &:active {
+                background-color: rgba(212, 55, 55, 0.904);
+            }
+        }
+
+        .false-call {
+            animation: blink 0.25s infinite !important;
+        }
+
+        @keyframes blink {
+
+            0%,
+            50% {
+                background-color: rgba(212, 55, 55, 0.904);
+            }
+
+            51%,
+            100% {
+                background-color: black;
+            }
+        }
+
+        h2 {
+            font-size: 21px;
+            margin: 0;
+        }
+    }
+
+    .uno-btn {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 80px;
+        height: 80px;
+        background-color: black;
+        border-radius: 50%;
+        cursor: pointer;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 25px;
+        margin-bottom: 25px;
+        transition: all 0.125s;
+        font-weight: bold;
+
+        &:hover {
+            transform: scale(1.1);
+        }
+
+        &:active {
+            background-color: rgba(0, 0, 0, 0.399);
+        }
+    }
+
     .time-bar {
         position: absolute;
         animation: timeBar 5s linear forwards;
-        height: 25px;
+        height: 15px;
         background-color: black;
         top: 70px;
         color: white;
@@ -33,7 +126,7 @@
         overflow: hidden;
         width: 0;
         left: 0;
-        
+
     }
 
     @keyframes timeBar {
