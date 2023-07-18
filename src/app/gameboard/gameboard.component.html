@@ -78,3 +78,14 @@
     </div>
     <div class="uno-btn" (click)="callUno()">Call UNO</div>
 </div>
+
+<div class="dev-tool" *ngIf="devtool">
+    <h2>Devtool</h2>
+    <div class="data">myCards.lenght: {{ myCards.length }}</div>
+    <div class="data">pickCardAnimation: {{ pickCardAnimation }}</div>
+    <div class="data">CardInThrow: {{ cardInThrow }}</div>
+    <div class="data">fadeOut: {{ fadeOut }}</div>
+    <div class="data">drawCount: {{ firestoreService.drawCount }}</div>
+    <div class="data">stack.lenght: {{ firestoreService.onlineGame.stack.length }}</div>
+    <div class="data">throwedCards.length: {{ this.firestoreService.onlineGame.throwedCards.length }}</div>
+</div>

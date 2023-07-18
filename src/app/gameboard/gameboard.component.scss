@@ -2,6 +2,17 @@
     overflow: hidden;
 }
 
+.dev-tool {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: red;
+    background-color: rgba(0, 0, 0, 0.261);
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 24px;
+}
+
 .gameboard {
     background-image: url("~src/assets/background-gd67c8c145_1920.jpg");
     height: 100vh;

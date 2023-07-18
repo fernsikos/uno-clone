@@ -7,7 +7,7 @@ import { FirestoreService } from '../firestore.service';
 import { DocumentData, DocumentReference, collection, doc, getDoc, getDocs, getFirestore, onSnapshot, setDoc } from 'firebase/firestore';
 import { environment } from 'src/environments/environment';
 import { initializeApp } from 'firebase/app';
-import { timeout } from 'rxjs';
+import { last, timeout } from 'rxjs';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 
 
@@ -49,6 +49,7 @@ export class GameboardComponent implements OnInit {
   public pickCardAnimation: boolean = false;
   public cardInThrow: string;
   public fadeOut: boolean = false;
+  public devtool: boolean= true;
 
 
   constructor(private route: ActivatedRoute, public firestoreService: FirestoreService) {
@@ -101,27 +102,32 @@ export class GameboardComponent implements OnInit {
     } else console.log('not my Turn')
   }
 
-  handlePickCards(exeption) {
+  async handlePickCards(exeption) {
     const notEnoughCards = this.checkIfStackHasEnoughCards();
     if (notEnoughCards) {
       console.log('not enough Cards')
-      let shuffeledThrowedCards = this.rules.shuffle(this.firestoreService.onlineGame.throwedCards.pop());
-      console.log(shuffeledThrowedCards)
-      // this.firestoreService.pushShuffeledThrowedCardsToStack(shuffeledThrowedCards)
-      // this.firestoreService.onlineGame.throwedCards= this.firestoreService.onlineGame.throwedCards[this.firestoreService.onlineGame.throwedCards.length]
+      let shuffeledThrowedCards = this.firestoreService.onlineGame.throwedCards.slice(0, -1);//without Last Card
+      let lastcard = this.firestoreService.onlineGame.throwedCards[this.firestoreService.onlineGame.throwedCards.length]
+      lastcard['throwNumber'] = false;
+      console.log(lastcard)
+      console.log(this.rules.shuffle(shuffeledThrowedCards.slice(0, -1)))
+      await this.firestoreService.pushShuffeledThrowedCardsToStack(shuffeledThrowedCards)
+      // this.firestoreService.onlineGame.throwedCards = this.firestoreService.onlineGame.throwedCards[this.firestoreService.onlineGame.throwedCards.length]
     }
 
+    // Bug beim löschen der karten auf dem stack
     for (let i = 0; i < this.firestoreService.drawCount; i++) {
       const cardToDelete = this.firestoreService.onlineGame.stack[i]
       this.myCards.push(cardToDelete);
-      this.firestoreService.pushPickedCardToMyCardsFirestore(cardToDelete);
-      this.firestoreService.deleteCardFromStack(cardToDelete['id'])
+      await this.firestoreService.pushPickedCardToMyCardsFirestore(cardToDelete);
+      await this.firestoreService.deleteCardFromStack(cardToDelete['id'])
     }
     if (this.firestoreService.drawCount > 1) {
       this.handleDrawCountReset()
     } else if (!exeption) {
       this.activateTimeBar()
     }
+    console.log(this.firestoreService.onlineGame.stack)
   }
 
   handleDrawCountReset() {

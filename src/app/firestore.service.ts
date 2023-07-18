@@ -162,6 +162,7 @@ export class FirestoreService implements OnInit {
 
   deleteCardFromStack(cardId) {
     deleteDoc(doc(this.db, 'games', this.gameId, 'stack', cardId))
+    console.log('delete Card id: ' + cardId)
   }
 
   async loadfFirstcard() {

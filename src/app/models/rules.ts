@@ -29,7 +29,7 @@ export class Rules {
         if(this.forceDraw) {
             if(this.throwedCard['special'] === '+4') {
                 this.returnData.pass = true
-                this.returnData.draw = 4
+                this.returnData.draw = 14// Devvelop
                 this.returnData.activateColorWheel = true;
             }
             console.log('filter ForceDraw')
@@ -92,7 +92,7 @@ export class Rules {
             this.returnData.pass = true,
             this.returnData.activateColorWheel = true;
         } else if (this.throwedCard['special'] === '+4') {
-            this.returnData.draw = 4;
+            this.returnData.draw = 14;// Devvelop
             this.returnData.pass = true;
             this.returnData.activateColorWheel = true;
             this.returnData.forceDraw = true;
@@ -141,7 +141,7 @@ export class Rules {
 
     checkForWild() {
         if (this.throwedCard['special'] === '+4') {
-            this.returnData.draw = 4;
+            this.returnData.draw = 14;// Devvelop
             this.returnData.pass = true;
             this.returnData.activateColorWheel = true;
             this.returnData.forceDraw = true;
