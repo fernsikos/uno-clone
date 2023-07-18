@@ -49,7 +49,7 @@ export class GameboardComponent implements OnInit {
   public pickCardAnimation: boolean = false;
   public cardInThrow: string;
   public fadeOut: boolean = false;
-  public devtool: boolean= true;
+  public devtool: boolean = true;
 
 
   constructor(private route: ActivatedRoute, public firestoreService: FirestoreService) {
@@ -68,7 +68,7 @@ export class GameboardComponent implements OnInit {
     await this.firestoreService.loadPlayers();
     await this.firestoreService.loadStackFromFirestore();
     await this.checkIfCardsLoaded(this.firestoreService);
-    await this.firestoreService.loadfFirstcard();
+    // await this.firestoreService.loadfFirstcard();
     await this.firestoreService.snapGameChanges();
     await this.firestoreService.snapUnoCalls();
     await this.firestoreService.snapLateCalls()
@@ -104,30 +104,49 @@ export class GameboardComponent implements OnInit {
 
   async handlePickCards(exeption) {
     const notEnoughCards = this.checkIfStackHasEnoughCards();
-    if (notEnoughCards) {
-      console.log('not enough Cards')
-      let shuffeledThrowedCards = this.firestoreService.onlineGame.throwedCards.slice(0, -1);//without Last Card
-      let lastcard = this.firestoreService.onlineGame.throwedCards[this.firestoreService.onlineGame.throwedCards.length]
-      lastcard['throwNumber'] = false;
-      console.log(lastcard)
-      console.log(this.rules.shuffle(shuffeledThrowedCards.slice(0, -1)))
-      await this.firestoreService.pushShuffeledThrowedCardsToStack(shuffeledThrowedCards)
-      // this.firestoreService.onlineGame.throwedCards = this.firestoreService.onlineGame.throwedCards[this.firestoreService.onlineGame.throwedCards.length]
+    if (notEnoughCards) {this.handleNotEnoughCards()
+    } else {
+      // Bug beim löschen der karten auf dem stack
+      for (let i = 0; i < this.firestoreService.drawCount; i++) {
+        const cardToDelete = this.firestoreService.onlineGame.stack[i]
+        this.myCards.push(cardToDelete);
+        // this.firestoreService.onlineGame.stack.splice(i, 1)
+        // const indexOfCardToDelete = this.firestoreService.onlineGame.throwedCards.findIndex((card) => card['id'] === cardToDelete['id'])
+        await this.firestoreService.pushPickedCardToMyCardsFirestore(cardToDelete);
+      }
+      
+      for (let i = 0; i < this.firestoreService.drawCount; i++) {
+        const cardToDelete = this.firestoreService.onlineGame.stack[i];
+        
+        await this.firestoreService.deleteCardFromStack(cardToDelete['id'])
+      }
+      
+      if (this.firestoreService.drawCount > 1) {
+        this.handleDrawCountReset()
+      } else if (!exeption) {
+        this.activateTimeBar()
+      }
+
     }
 
-    // Bug beim löschen der karten auf dem stack
-    for (let i = 0; i < this.firestoreService.drawCount; i++) {
-      const cardToDelete = this.firestoreService.onlineGame.stack[i]
-      this.myCards.push(cardToDelete);
-      await this.firestoreService.pushPickedCardToMyCardsFirestore(cardToDelete);
-      await this.firestoreService.deleteCardFromStack(cardToDelete['id'])
+  }
+
+  handleNotEnoughCards() {
+    console.log('not enough Cards')
+    let shuffeledThrowedCards = this.firestoreService.onlineGame.throwedCards
+    // let shuffeledThrowedCards = this.firestoreService.onlineGame.throwedCards.slice(0, -1);//without Last Card
+
+    for (let i = 0; i < shuffeledThrowedCards.length; i++) {
+      const card = shuffeledThrowedCards[i];
+      const cardId = card['id'];
+      delete card['throwNumber'];
+      delete card['throw'];
+      delete card['id']
+      this.firestoreService.pushShuffeledThrowedCardsToStack(card)
+      this.firestoreService.deleteThrowedCard(cardId)
     }
-    if (this.firestoreService.drawCount > 1) {
-      this.handleDrawCountReset()
-    } else if (!exeption) {
-      this.activateTimeBar()
-    }
-    console.log(this.firestoreService.onlineGame.stack)
+    this.firestoreService.onlineGame.throwedCards = []
+    this.firestoreService.updateFirstCardFirestore()
   }
 
   handleDrawCountReset() {
@@ -139,7 +158,7 @@ export class GameboardComponent implements OnInit {
   }
 
   checkIfStackHasEnoughCards() {
-    if(this.firestoreService.drawCount > this.firestoreService.onlineGame.stack.length) {
+    if (this.firestoreService.drawCount > this.firestoreService.onlineGame.stack.length) {
       return true
     } else return false
   }

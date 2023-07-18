@@ -68,11 +68,12 @@ export class FirestoreService implements OnInit {
     }
   }
 
-  async pushShuffeledThrowedCardsToStack(shuffledCards) {
-    const collectionRef = collection(this.db, 'games', this.gameId, 'stack');
-    shuffledCards.forEach(async card => {
-      await addDoc(collectionRef, card);
-    });
+  async pushShuffeledThrowedCardsToStack(card) {
+    addDoc(collection(this.db, 'games', this.gameId, 'stack'), card)
+    // const collectionRef = collection(this.db, 'games', this.gameId, 'stack');
+    // shuffledCards.forEach(async card => {
+    //   await addDoc(collectionRef, card);
+    // });
   }
 
   async pushMyCardsToFirestore(playerMe, myCards) {
@@ -150,8 +151,10 @@ export class FirestoreService implements OnInit {
           } else if (change.type == 'removed') {
             // console.log('delete incoming')
             let cardToRemove = this.onlineGame.stack.findIndex(c => c.card == change.doc.data()['card']);
-            // console.log('card To Remove   ', cardToRemove, 'card that be found:  ' , this.onlineGame.stack[cardToRemove], 'stack länge :', this.onlineGame.stack.length)
-            this.onlineGame.stack.splice(cardToRemove, 1)
+            console.log('card To Remove   ', cardToRemove, 'card that be found:  ' , this.onlineGame.stack[cardToRemove], 'stack länge :', this.onlineGame.stack.length)
+            if(cardToRemove !== -1) {
+              this.onlineGame.stack.splice(cardToRemove, 1)
+            }
             // console.log('stack länge ',this.onlineGame.stack.length)
           }
         })
@@ -172,6 +175,9 @@ export class FirestoreService implements OnInit {
 
   async snapGameChanges() {
     onSnapshot(doc(this.db, 'games', this.gameId), async (snapshot) => {
+      if(snapshot.data()['firstcard']) {
+        this.onlineGame.firstCard = snapshot.data()['firstcard']
+      }
       if(snapshot.data()['lastCard']) {
         this.onlineGame.lastCard = snapshot.data()['lastCard']
         this.snapThrowedCards()
@@ -226,6 +232,12 @@ export class FirestoreService implements OnInit {
     updateDoc(doc(this.db, 'games', this.gameId), {drawCount: count})
   }
 
+  updateFirstCardFirestore() {
+    console.log('update Firstcard')
+    console.log(this.onlineGame.firstCard)
+    updateDoc(doc(this.db, 'games', this.gameId), {firstcard: this.onlineGame.lastCard})
+  }
+
   updateActivePlayerFirestore(playerNumber) {
     updateDoc(doc(this.db,'games', this.gameId), { activePlayer: playerNumber})
   }
@@ -273,22 +285,43 @@ export class FirestoreService implements OnInit {
 
   async snapThrowedCards() {
     await onSnapshot(collection(this.db, 'games', this.gameId, 'throwedCards'), async (snapshot) => {
-      snapshot.docs.forEach(async (doc) => {
-        const cardAlreadyExists = this.onlineGame.throwedCards.some((card) => card.id === doc.data()['id']);
-        if (!cardAlreadyExists) {
-          this.onlineGame.throwedCards.push(doc.data());
+      snapshot.docChanges().forEach(async (change) => {
+        if(change.type === 'added') {
+          const cardAlreadyExists = this.onlineGame.throwedCards.some((card) => card.id === change.doc.data()['id']);
+          if (!cardAlreadyExists) {
+            this.onlineGame.throwedCards.push(change.doc.data());
+          }
+        } else if(change.type === 'modified') {
+          const indexOfCardToChange = this.onlineGame.throwedCards.findIndex((card) => card['id'] === change.doc.data()['id'])
+          this.onlineGame.throwedCards[indexOfCardToChange] = change.doc.data()
+          console.log('incoming mofiication Throwed Cards')
+        } else if(change.type === 'removed') {
+          const indexOfCardToRemove = this.onlineGame.throwedCards.findIndex((card) => card['id'] === change.doc.data()['id'])
+          if(indexOfCardToRemove !== -1) {
+            this.onlineGame.throwedCards.splice(indexOfCardToRemove, 1)
+            console.log(' throw card delete incoming')
+          }
         }
       });
       
-      this.onlineGame.throwedCards.sort((a, b) => {
-        if (a.throwNumber < b.throwNumber) {
-          return -1;
-        }
-        if (a.throwNumber > b.throwNumber) {
-          return 1;
-        }
-        return 0;
-      });
+      this.sortThrowedCards() 
+    });
+  }
+
+  deleteThrowedCard(id) {
+    deleteDoc(doc(this.db, 'games', this.gameId, 'throwedCards', id))
+  }
+  
+
+  sortThrowedCards() {
+    this.onlineGame.throwedCards.sort((a, b) => {
+      if (a.throwNumber < b.throwNumber) {
+        return -1;
+      }
+      if (a.throwNumber > b.throwNumber) {
+        return 1;
+      }
+      return 0;
     });
   }
 
